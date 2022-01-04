@@ -1,16 +1,8 @@
-# Star-Fox-2D
-Created for Programming 11, March - May 2017
+# Star-Fox-2D v2.0
+A re-creation of my old programming project, now using Monogame and C#.
 
-How to run:
+All original features will be implemented, plus new features I wasn't able to add before, like saving your progress and doing a barrel roll!
 
-Download Star Fox 2D v1.1.py
+WIP: downloads for Windows will be available once finished, and ideally Mac and Linux versions will follow as cross-platform support using .NET Core is (theoretically) simple. We'll see if it's as easy as advertised.
 
-Go to codeskulptor.org (Mozilla Firefox is recommended, Chrome runs CodeSkulptor slowly)
-
-Click 'Open Local' and select downloaded file
-
-Click 'Run' and wait for images to load (should see Line 131: TimeLimitError: Program exceeded run time limit.)
-
-Click 'Run' again, now that images are loaded; game should work properly
-
-Be warned: since file I/O is not supported, your progress will not be saved if the game is closed
+For the original Python version, see the "Python (Old)" folder for the code and instructions on how to run the game.

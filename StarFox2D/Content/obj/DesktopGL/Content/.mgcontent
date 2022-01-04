@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/andross-head.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/andross-lh.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/andross-rh.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/arwing.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/arwing-front.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster1.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster2.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster3.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster4.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster5.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/background.jpg</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/Circle.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/debris1.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/debris2.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/debris3.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/fly.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontLarge.spritefont</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontRegular.spritefont</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontTitle.spritefont</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/fox.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/granga.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/hornet.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/mini-andross.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/mosquito.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/queen.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/Ring.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/sat1.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/sat2.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/sat3.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/turret-arm.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/turret-base.png</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/wolfen.png</File>
+  </SourceFiles>
+  <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+  </DestFiles>
+</SourceFileCollection>

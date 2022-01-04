@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "AC98qYjb6GpDJZ9clZ2fnmCuZtBaiBCadVnvaDBZ0jYkHnD0IS3bAC4Mh2yY3wJY+f9oJU4D6sMSzSPdKku1NA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Jonathan\\Documents\\Programming\\Star-Fox-2D\\StarFox2D\\StarFox2D.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Jonathan\\.nuget\\packages\\monogame.content.builder.task\\3.8.0.1641\\monogame.content.builder.task.3.8.0.1641.nupkg.sha512",
+    "C:\\Users\\Jonathan\\.nuget\\packages\\monogame.framework.desktopgl\\3.8.0.1641\\monogame.framework.desktopgl.3.8.0.1641.nupkg.sha512"
+  ],
+  "logs": []
+}
