@@ -8,12 +8,17 @@ namespace StarFox2D.Classes
 {
     public class Player : RoundObject
     {
-        public Player(int health, ID id, int damage, int score, int radius, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
-            : base(health, id, damage, score, radius, mainTexture, additionalTextures, bulletEffects) { }
+        public float BaseVelocity { get; private set; }
+
+        public Player(int health, ObjectID id, int damage, int score, int radius, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
+            : base(health, id, damage, score, radius, mainTexture, additionalTextures, bulletEffects) 
+        {
+            BaseVelocity = 300;
+        }
 
         public override void Update(TimeSpan levelTime)
         {
-            throw new NotImplementedException();
+            // TODO
         }
 
         public override void Draw(SpriteBatch spriteBatch)

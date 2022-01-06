@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using StarFox2D.Classes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace StarFox2D
 {
@@ -30,7 +31,7 @@ namespace StarFox2D
         /// </summary>
         public static List<Bullet> Bullets;
 
-        public static int CurrentLevel;
+        public static Level CurrentLevel;
 
         public static int CurrentScore;
 
@@ -59,6 +60,14 @@ namespace StarFox2D
 
         private MenuPages page;
 
+        private float elapsedSeconds;
+
+        private KeyboardState kstate;
+
+        private Vector2 playerVelocity;
+
+
+
         public MainGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -66,6 +75,7 @@ namespace StarFox2D
             IsMouseVisible = true;
             playingLevel = false;
             page = MenuPages.TitleScreen;
+            playerVelocity = Vector2.Zero;
         }
 
         protected override void Initialize()
@@ -103,14 +113,53 @@ namespace StarFox2D
             {
                 CurrentTime += gameTime.ElapsedGameTime;
 
+                // update level (spawns objects)
+                CurrentLevel.Update(CurrentTime);
+
+
                 // move all objects (players, enemies, etc)
+                // TODO movement multipliers from effects
+                // TODO constrain movement for player so it can't go off screen
+                kstate = Keyboard.GetState();
+
+                playerVelocity = Vector2.Zero;
+                if (kstate.IsKeyDown(Keys.W) && CurrentLevel.InBossFight)
+                    playerVelocity.Y -= Player.BaseVelocity;
+                if (kstate.IsKeyDown(Keys.S) && CurrentLevel.InBossFight)
+                    playerVelocity.Y += Player.BaseVelocity;
+                if (kstate.IsKeyDown(Keys.A))
+                    playerVelocity.X -= Player.BaseVelocity;
+                if (kstate.IsKeyDown(Keys.D))
+                    playerVelocity.X += Player.BaseVelocity;
+
+
+                elapsedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                Player.Position += playerVelocity * elapsedSeconds;
+                foreach (var enemy in Enemies)
+                    enemy.Position += enemy.Velocity * elapsedSeconds;
+                foreach (var building in Buildings)
+                    building.Position += building.Velocity * elapsedSeconds;
+                foreach (var bullet in Bullets)
+                    bullet.Position += bullet.Velocity * elapsedSeconds;
+
+
                 // then call update methods for all objects for additional logic
+                Player.Update(CurrentTime);
+                foreach (var enemy in Enemies)
+                    enemy.Update(CurrentTime);
+                foreach (var building in Buildings)
+                    building.Update(CurrentTime);
+                foreach (var bullet in Bullets)
+                    bullet.Update(CurrentTime);
+
+
+                // delete objects once a second TODO
             }
 
             // TEMP TESTING
-            if (gameTime.TotalGameTime > TimeSpan.FromSeconds(1))
+            if (gameTime.TotalGameTime > TimeSpan.FromSeconds(1) && !playingLevel)
             {
-                StartLevel(1);
+                StartLevel(LevelID.Corneria);
             }
 
             base.Update(gameTime);
@@ -204,22 +253,23 @@ namespace StarFox2D
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error in loading textures:");
-                Console.WriteLine(e);
+                Debug.WriteLine("Error in loading textures:");
+                Debug.WriteLine(e);
                 Exit();
             }
 
             Textures.TexturesAreLoaded = true;
         }
 
-        private void StartLevel(int level)
+        private void StartLevel(LevelID level)
         {
             CurrentTime = TimeSpan.Zero;
+            CurrentLevel = new Level(level);
 
-
+            // initialize Player
             // TEMP implement shield formula later
             int health = 50;
-            Player = new Player(health, ID.Player, 1, 0, 45, Textures.Arwing);
+            Player = new Player(health, ObjectID.Player, 1, 0, 45, Textures.Arwing);
             Player.Position = new Vector2(250, 625);
 
             Enemies = new List<Classes.Object>();

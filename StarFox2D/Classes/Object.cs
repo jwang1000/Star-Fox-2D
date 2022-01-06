@@ -45,7 +45,7 @@ namespace StarFox2D.Classes
         /// </summary>
         public Effects AppliedEffects { get; private set; }
 
-        public ID ID { get; private set; }
+        public ObjectID ID { get; private set; }
 
         public Texture2D MainTexture { get; private set; }
 
@@ -70,7 +70,7 @@ namespace StarFox2D.Classes
         protected List<float> AdditionalTexturesRotation { get; set; }
 
 
-        public Object(int health, ID id, int damage, int score, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
+        public Object(int health, ObjectID id, int damage, int score, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
         {
             Health = health;
             MaxHealth = health;
@@ -147,7 +147,7 @@ namespace StarFox2D.Classes
     /// IDs for all objects in the game.
     /// Bullets take on the ID of the object that fired it.
     /// </summary>
-    public enum ID
+    public enum ObjectID
     {
         Player,
         Granga, 
