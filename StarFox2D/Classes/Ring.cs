@@ -40,7 +40,7 @@ namespace StarFox2D.Classes
             throw new NotImplementedException();
         }
 
-        protected override bool IsWithinBoundaries(Object other)
+        protected override bool OtherObjectIsWithinBoundaries(Object other)
         {
             throw new NotImplementedException();
         }

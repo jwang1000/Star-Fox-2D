@@ -23,7 +23,7 @@ namespace StarFox2D.Classes
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MainTexture, Position, null, Color.White, MainTextureRotation, TexturePosition, new Vector2((float)Radius * 2 / MainTexture.Width), SpriteEffects.None, 0f);
+            spriteBatch.Draw(MainTexture, Position, null, Color.White, MainTextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / MainTexture.Width), SpriteEffects.None, 0f);
 
             // TODO draw shield and effects
         }
@@ -33,7 +33,13 @@ namespace StarFox2D.Classes
             throw new NotImplementedException();
         }
 
-        protected override bool IsWithinBoundaries(Object other)
+        public override bool ObjectIsOutsideScreen()
+        {
+            // Player will never be outside the screen
+            return false;
+        }
+
+        protected override bool OtherObjectIsWithinBoundaries(Object other)
         {
             throw new NotImplementedException();
         }

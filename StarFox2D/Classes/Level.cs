@@ -41,13 +41,15 @@ namespace StarFox2D.Classes
         private long nextSpawnTimeTicks;
 
 
-        public Level(LevelID levelNumber)
+        public Level(LevelID levelNumber, int timeBeforeBossTextSeconds = 5)
         {
             LevelNumber = levelNumber;
 
             levelDetails = LevelOutline.GetLevelDetails(levelNumber);
             lastSpawnedObjectTime = new TimeSpan(0);
             nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[0].SpawnTime);
+
+            TimeBeforeBossText = new TimeSpan(0, 0, timeBeforeBossTextSeconds);
         }
 
 
@@ -70,7 +72,7 @@ namespace StarFox2D.Classes
                     if (spawningIsValid)
                     {
                         Object o = CreateObject(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].ObjectToSpawn);
-                        if (o is Enemy)
+                        if (o is RoundEnemy)
                             MainGame.Enemies.Add(o);
                         else
                             MainGame.Buildings.Add(o);
@@ -102,7 +104,7 @@ namespace StarFox2D.Classes
             switch (id)
             {
                 case ObjectID.Fly:
-                    o = new Enemy(2, id, 1, 5, 20, Textures.Fly);
+                    o = new RoundEnemy(2, id, 1, 5, 20, Textures.Fly);
                     o.Position = new Vector2(250, -10);
                     o.Velocity = new Vector2(50, 400);
                     break;
@@ -112,7 +114,7 @@ namespace StarFox2D.Classes
                     // TEMP create asteroid
                     o = new RoundObject(1, ObjectID.Asteroid, 0, 1, 25, Textures.Asteroid1);
                     o.Position = new Vector2(250, -30);
-                    o.Velocity = new Vector2(0, 350);
+                    o.Velocity = MainGame.BackgroundObjectVelocity;
                     break;
             }
 

@@ -10,6 +10,10 @@ namespace StarFox2D.Classes
     /// </summary>
     public abstract class Object
     {
+        /// <summary>
+        /// The position of the object marks its centre, regardless if it is square or round.
+        /// The size of the object is determined by its radius or side length.
+        /// </summary>
         public Vector2 Position { get; set; }
 
         public Vector2 Velocity { get; set; }
@@ -54,9 +58,9 @@ namespace StarFox2D.Classes
         /// <summary>
         /// The origin position of the texture. Should be set to the centre of the texture.
         /// </summary>
-        public Vector2 TexturePosition { get; protected set; }
+        public Vector2 TextureOriginPosition { get; protected set; }
 
-        public List<Vector2> AdditionalTexturePositions { get; protected set; }
+        public List<Vector2> AdditionalTextureOriginPositions { get; protected set; }
 
         /// <summary>
         /// The speed of the rotation of the texture.
@@ -82,9 +86,9 @@ namespace StarFox2D.Classes
             MainTextureRotationSpeed = 0f;
             AdditionalTexturesRotationSpeed = new List<float>();
 
-            TexturePosition = new Vector2(MainTexture.Width / 2, MainTexture.Height / 2);
+            TextureOriginPosition = new Vector2(MainTexture.Width / 2, MainTexture.Height / 2);
 
-            AdditionalTexturePositions = new List<Vector2>();
+            AdditionalTextureOriginPositions = new List<Vector2>();
             if (additionalTextures is null)
             {
                 AdditionalTextures = new List<Texture2D>();
@@ -94,7 +98,7 @@ namespace StarFox2D.Classes
                 AdditionalTextures = additionalTextures;
                 foreach (Texture2D t in AdditionalTextures)
                 {
-                    AdditionalTexturePositions.Add(new Vector2(t.Width / 2, t.Height / 2));
+                    AdditionalTextureOriginPositions.Add(new Vector2(t.Width / 2, t.Height / 2));
                 }
             }
 
@@ -117,7 +121,7 @@ namespace StarFox2D.Classes
         /// <param name="spriteBatch"></param>
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MainTexture, TexturePosition, null, Color.White, MainTextureRotation, new Vector2(MainTexture.Width / 2, MainTexture.Height / 2), Vector2.One, SpriteEffects.None, 0f);
+            spriteBatch.Draw(MainTexture, TextureOriginPosition, null, Color.White, MainTextureRotation, new Vector2(MainTexture.Width / 2, MainTexture.Height / 2), Vector2.One, SpriteEffects.None, 0f);
         }
 
         /// <summary>
@@ -126,10 +130,17 @@ namespace StarFox2D.Classes
         public abstract void CheckBulletCollision(Bullet bullet);
 
         /// <summary>
+        /// Returns true if the object is fully outside the screen and should be despawned.
+        /// Only needs to be implemented in RoundObject and SquareObject.
+        /// </summary>
+        public abstract bool ObjectIsOutsideScreen();
+
+        /// <summary>
         /// Given the other object, checks if the hitboxes are overlapping.
         /// The entire Object needs to be passed in for the Visitor design pattern.
+        /// TODO is this necessary for the base class? Maybe only need to include in Player class.
         /// </summary>
-        protected abstract bool IsWithinBoundaries(Object other);
+        protected abstract bool OtherObjectIsWithinBoundaries(Object other);
 
         /// <summary>
         /// Adds the object's score to the score of the game level.

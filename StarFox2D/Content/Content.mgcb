@@ -286,6 +286,18 @@
 /processorParam:TextureFormat=Color
 /build:mosquito.png
 
+#begin music/Corneria.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/Corneria.wav
+
+#begin music/CorneriaIntro.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/CorneriaIntro.wav
+
 #begin queen.png
 /importer:TextureImporter
 /processor:TextureProcessor

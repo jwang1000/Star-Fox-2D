@@ -2,6 +2,9 @@
 
 namespace StarFox2D.Classes
 {
+    /// <summary>
+    /// Class containing all textures and sprites in the game.
+    /// </summary>
     public static class Textures
     {
         public static bool TexturesAreLoaded = false;
@@ -47,5 +50,8 @@ namespace StarFox2D.Classes
         public static Texture2D TurretBase;
 
         public static Texture2D Wolfen;
+
+        // TODO blank button doesn't centre properly, replace with sprite
+        public static Texture2D Button;
     }
 }

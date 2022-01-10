@@ -44,7 +44,7 @@ namespace StarFox2D.Classes
         private static ScreenText[] corneriaEndText = 
         { 
             new ScreenText("Once Andross hears about this, you're", new Vector2(40, 370)),
-            new ScreenText("throught, you hear me? Through!", new Vector2(70, 400))
+            new ScreenText("through, you hear me? Through!", new Vector2(70, 400))
         };
         public static readonly FullLevelDetails Corneria = new FullLevelDetails(corneriaObjectSpawns, corneriaBossSpawns, corneriaStartText, corneriaEndText);
 

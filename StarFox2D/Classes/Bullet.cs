@@ -7,10 +7,10 @@ using System.Text;
 
 namespace StarFox2D.Classes
 {
-    public class Bullet : Object
+    public class Bullet : RoundObject
     {
-        public Bullet(int health, ObjectID id, int damage, int score, Texture2D mainTexture, Effects bulletEffects = null) 
-            : base(health, id, damage, score, mainTexture, null, bulletEffects) { }
+        public Bullet(int health, ObjectID id, int damage, int score, int radius, Texture2D mainTexture, Effects bulletEffects = null) 
+            : base(health, id, damage, score, radius, mainTexture, null, bulletEffects) { }
 
         public override void Update(TimeSpan levelTime)
         {
@@ -40,7 +40,7 @@ namespace StarFox2D.Classes
             return;
         }
 
-        protected override bool IsWithinBoundaries(Object other)
+        protected override bool OtherObjectIsWithinBoundaries(Object other)
         {
             // method should never be called for a bullet, only for buildings, players, enemies, bosses
             Debug.WriteLine("ERROR: Bullet class IsWithinBoundaries was called with argument " + other.ID);

@@ -55,3 +55,7 @@ C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcorea
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\FontRegular.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\FontTitle.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\FontLarge.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\Corneria.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaIntro.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\Corneria.ogg
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaIntro.ogg

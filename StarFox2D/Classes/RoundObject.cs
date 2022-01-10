@@ -23,9 +23,9 @@ namespace StarFox2D.Classes
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MainTexture, Position, null, Color.White, MainTextureRotation, TexturePosition, new Vector2((float)Radius * 2 / MainTexture.Width), SpriteEffects.None, 0f);
+            spriteBatch.Draw(MainTexture, Position, null, Color.White, MainTextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / MainTexture.Width), SpriteEffects.None, 0f);
 
-            // TODO draw effects?
+            // TODO draw effects
         }
 
         public override void CheckBulletCollision(Bullet bullet)
@@ -33,12 +33,14 @@ namespace StarFox2D.Classes
             throw new NotImplementedException();
         }
 
-        protected override bool IsWithinBoundaries(Object other)
+        public override bool ObjectIsOutsideScreen()
         {
-            throw new NotImplementedException();
+            return Position.Y + Radius >= MainGame.ScreenHeight + MainGame.DespawnBuffer ||
+                Position.X - Radius <= -MainGame.DespawnBuffer ||
+                Position.X + Radius >= MainGame.ScreenWidth + MainGame.DespawnBuffer;
         }
 
-        protected override void Death()
+        protected override bool OtherObjectIsWithinBoundaries(Object other)
         {
             throw new NotImplementedException();
         }

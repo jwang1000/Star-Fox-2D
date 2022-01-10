@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StarFox2D.Classes;
@@ -10,8 +11,8 @@ namespace StarFox2D
 {
     public class MainGame : Game
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
 
 
         public static Player Player;
@@ -48,6 +49,22 @@ namespace StarFox2D
         public static SpriteFont FontTitle;
 
         /// <summary>
+        /// The speed that objects should move at to appear motionless against the background.
+        /// X = 0, Y = 300.
+        /// </summary>
+        public static readonly Vector2 BackgroundObjectVelocity = new Vector2(0, 300);
+
+        public static int ScreenWidth = 500;
+
+        public static int ScreenHeight = 800;
+
+        /// <summary>
+        /// The number of pixels that an object can be outside the screen without despawning.
+        /// </summary>
+        public static readonly int DespawnBuffer = 10;
+
+
+        /// <summary>
         /// Whether or not the player is currently in a level.
         /// </summary>
         private bool playingLevel;
@@ -66,40 +83,68 @@ namespace StarFox2D
 
         private Vector2 playerVelocity;
 
+        /// <summary>
+        /// The minimum y-value that the player can reach during a boss fight. (all range mode)
+        /// </summary>
+        private float playerBossBorder;
+
+        /// <summary>
+        /// Accumulates elapsed time in the update method until it reaches >1. Subtracts 1 afterwards.
+        /// </summary>
+        private double secondTimer;
+
+        /// <summary>
+        /// The current song playing. Necessary for switching from intro to the looped part of the song.
+        /// </summary>
+        private MusicIntroLoop currentSong;
+
+        /// <summary>
+        /// Set to true once all content is done loading. If this is true, then all textures are ready to use and the
+        /// main menu music has already started.
+        /// </summary>
+        private bool allMediaLoaded;
+
+        /// <summary>
+        /// All buttons that currently exist on screen. Add to and remove from list as needed.
+        /// </summary>
+        private List<Button> buttons;
+
+        private MouseState mouseState;
+
 
 
         public MainGame()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             playingLevel = false;
             page = MenuPages.TitleScreen;
             playerVelocity = Vector2.Zero;
+            secondTimer = 0;
+            buttons = new List<Button>();
         }
 
         protected override void Initialize()
         {
             // set window size
-            _graphics.PreferredBackBufferWidth = 500;
-            _graphics.PreferredBackBufferHeight = 800;
-            _graphics.ApplyChanges();
+            graphics.PreferredBackBufferWidth = ScreenWidth;
+            graphics.PreferredBackBufferHeight = ScreenHeight;
+            graphics.ApplyChanges();
 
             base.Initialize();
-
-            // initialize classes that require content (i.e. sprites)
-            backgroundImagePosition = new Vector2(Textures.Background.Width / 2, 0);
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // load sprites
+            // load media
             FontRegular = Content.Load<SpriteFont>("FontRegular");
             FontLarge = Content.Load<SpriteFont>("FontLarge");
             FontTitle = Content.Load<SpriteFont>("FontTitle");
             LoadTextures();
+            LoadSounds();
         }
 
         protected override void Update(GameTime gameTime)
@@ -107,7 +152,37 @@ namespace StarFox2D
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            if (!Textures.TexturesAreLoaded || !Sounds.SoundsAreLoaded)
+            {
+                return;
+            }
+            else if (!allMediaLoaded)
+            {
+                // complete final initialization needed
+
+                // initialize classes that require content (i.e. sprites)
+                backgroundImagePosition = new Vector2(Textures.Background.Width / 2, 0);
+                playerBossBorder = ScreenHeight / 2;
+
+                StartMusic();
+
+                allMediaLoaded = true;
+            }
+
+            currentSong.Update(gameTime);
+
+
+            // update buttons
+            mouseState = Mouse.GetState();
+            foreach (Button b in buttons)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed && b.MouseHoversButton(mouseState.Position.ToVector2()))
+                {
+                    // TEMP testing only
+                    b.Clicked(() => Debug.WriteLine("Clicked!" + CurrentTime));
+                }
+            }
+
 
             if (playingLevel)
             {
@@ -119,41 +194,89 @@ namespace StarFox2D
 
                 // move all objects (players, enemies, etc)
                 // TODO movement multipliers from effects
-                // TODO constrain movement for player so it can't go off screen
                 kstate = Keyboard.GetState();
+                elapsedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+                // get input from player
                 playerVelocity = Vector2.Zero;
-                if (kstate.IsKeyDown(Keys.W) && CurrentLevel.InBossFight)
-                    playerVelocity.Y -= Player.BaseVelocity;
-                if (kstate.IsKeyDown(Keys.S) && CurrentLevel.InBossFight)
-                    playerVelocity.Y += Player.BaseVelocity;
+
+                if (CurrentLevel.InBossFight)
+                {
+                    if (kstate.IsKeyDown(Keys.W))
+                        playerVelocity.Y -= Player.BaseVelocity;
+                    if (kstate.IsKeyDown(Keys.S))
+                        playerVelocity.Y += Player.BaseVelocity;
+
+                    // constrain movement vertically
+                    if (Player.Position.Y <= playerBossBorder)
+                        playerVelocity.Y = MathF.Max(0, playerVelocity.Y);
+                    else if (Player.Position.Y >= ScreenHeight)
+                        playerVelocity.Y = MathF.Min(0, playerVelocity.Y);
+                }
                 if (kstate.IsKeyDown(Keys.A))
                     playerVelocity.X -= Player.BaseVelocity;
                 if (kstate.IsKeyDown(Keys.D))
                     playerVelocity.X += Player.BaseVelocity;
 
+                // constrain player movement horizontally
+                if (Player.Position.X <= 0)
+                    playerVelocity.X = MathF.Max(0, playerVelocity.X);
+                else if (Player.Position.X >= ScreenWidth)
+                    playerVelocity.X = MathF.Min(0, playerVelocity.X);
 
-                elapsedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                // call update methods simultaneously for all objects for additional logic
                 Player.Position += playerVelocity * elapsedSeconds;
-                foreach (var enemy in Enemies)
-                    enemy.Position += enemy.Velocity * elapsedSeconds;
-                foreach (var building in Buildings)
-                    building.Position += building.Velocity * elapsedSeconds;
-                foreach (var bullet in Bullets)
-                    bullet.Position += bullet.Velocity * elapsedSeconds;
-
-
-                // then call update methods for all objects for additional logic
                 Player.Update(CurrentTime);
+
                 foreach (var enemy in Enemies)
+                {
+                    enemy.Position += enemy.Velocity * elapsedSeconds;
                     enemy.Update(CurrentTime);
+                }
                 foreach (var building in Buildings)
+                {
+                    building.Position += building.Velocity * elapsedSeconds;
                     building.Update(CurrentTime);
+                }
                 foreach (var bullet in Bullets)
+                {
+                    bullet.Position += bullet.Velocity * elapsedSeconds;
                     bullet.Update(CurrentTime);
 
+                    // TODO check bullets against all enemies, buildings, and player
+                    // TODO remove dead objects immediately
+                }
 
-                // delete objects once a second TODO
+                // all updates that occur once per second are here
+                secondTimer += gameTime.ElapsedGameTime.TotalSeconds;
+                if (secondTimer > 1)
+                {
+                    secondTimer -= 1;
+
+                    // delete objects that are out of range
+                    for (int i = Enemies.Count - 1; i >= 0; --i)
+                    {
+                        if (Enemies[i].ObjectIsOutsideScreen())
+                        {
+                            Enemies.RemoveAt(i);
+                        }
+                    }
+                    for (int i = Buildings.Count - 1; i >= 0; --i)
+                    {
+                        if (Buildings[i].ObjectIsOutsideScreen())
+                        {
+                            Buildings.RemoveAt(i);
+                        }
+                    }
+                    for (int i = Bullets.Count - 1; i >= 0; --i)
+                    {
+                        if (Bullets[i].ObjectIsOutsideScreen())
+                        {
+                            Bullets.RemoveAt(i);
+                        }
+                    }
+                }
             }
 
             // TEMP TESTING
@@ -170,36 +293,42 @@ namespace StarFox2D
             GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
-            _spriteBatch.Begin();
+            spriteBatch.Begin();
 
             // Draw background
-            _spriteBatch.Draw(Textures.Background, backgroundImagePosition, null, Color.White, 0f, new Vector2(Textures.Background.Width/2, Textures.Background.Height/2), Vector2.One, SpriteEffects.None, 0f);
+            spriteBatch.Draw(Textures.Background, backgroundImagePosition, null, Color.White, 0f, new Vector2(Textures.Background.Width/2, Textures.Background.Height/2), Vector2.One, SpriteEffects.None, 0f);
+
+            // Draw buttons
+            foreach (Button b in buttons)
+            {
+                b.Draw(spriteBatch, mouseState.Position.ToVector2());
+            }
 
             if (playingLevel)
             {
-                Player.Draw(_spriteBatch);
+                Player.Draw(spriteBatch);
                 foreach (var enemy in Enemies)
-                    enemy.Draw(_spriteBatch);
+                    enemy.Draw(spriteBatch);
                 foreach (var building in Buildings)
-                    building.Draw(_spriteBatch);
+                    building.Draw(spriteBatch);
                 foreach (var bullet in Bullets)
-                    bullet.Draw(_spriteBatch);
+                    bullet.Draw(spriteBatch);
 
                 // update background
                 backgroundImagePosition.Y = (backgroundImagePosition.Y + 5) % (Textures.Background.Height / 2);
             }
             else
             {
-                _spriteBatch.DrawString(FontRegular, "v2.0", new Vector2(10, _graphics.PreferredBackBufferHeight - 25), Color.White);
+                spriteBatch.DrawString(FontRegular, "v2.0", new Vector2(10, ScreenHeight - 25), Color.White);
                 switch(page)
                 {
                     case MenuPages.TitleScreen:
-                        _spriteBatch.DrawString(FontTitle, "STAR FOX 2D", new Vector2(50, 50), Color.White);
+                        spriteBatch.DrawString(FontTitle, "STAR FOX 2D", new Vector2(50, 50), Color.White);
                         break;
                 }
             }
 
-            _spriteBatch.End();
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
@@ -250,6 +379,11 @@ namespace StarFox2D
                 Textures.TurretBase = Content.Load<Texture2D>("turret-base");
 
                 Textures.Wolfen = Content.Load<Texture2D>("wolfen");
+
+                Textures.Button = new Texture2D(graphics.GraphicsDevice, 1, 1);
+                Textures.Button.SetData(new[] { Color.White });
+
+                Textures.TexturesAreLoaded = true;
             }
             catch (Exception e)
             {
@@ -257,8 +391,34 @@ namespace StarFox2D
                 Debug.WriteLine(e);
                 Exit();
             }
+        }
 
-            Textures.TexturesAreLoaded = true;
+        private void LoadSounds()
+        {
+            try
+            {
+                SoundEffect corneriaIntro = Content.Load<SoundEffect>("music/CorneriaIntro");
+                SoundEffect corneria = Content.Load<SoundEffect>("music/Corneria");
+                Sounds.Corneria = new MusicIntroLoop(corneria, corneriaIntro);
+
+                Sounds.SoundsAreLoaded = true;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error in loading sounds:");
+                Debug.WriteLine(e);
+                Exit();
+            }
+        }
+
+        /// <summary>
+        /// Starts the main menu music. Only necessary for the beginning of the game.
+        /// </summary>
+        private void StartMusic()
+        {
+            // TESTING play corneria and loop properly
+            currentSong = Sounds.Corneria;
+            currentSong.Start();
         }
 
         private void StartLevel(LevelID level)
@@ -275,6 +435,10 @@ namespace StarFox2D
             Enemies = new List<Classes.Object>();
             Buildings = new List<Classes.Object>();
             Bullets = new List<Bullet>();
+
+
+            // TEMP
+            buttons.Add(new Button(new Vector2(250, 200), 45, 45, Color.White, Color.AliceBlue, Textures.Button, Textures.Button));
 
             playingLevel = true;
         }
