@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace StarFox2D.Classes
@@ -17,7 +18,13 @@ namespace StarFox2D.Classes
 
         public static float MusicVolume = 0.25f;  // temp set to 0.25
 
+
+
+        public static MusicIntroLoop Menu;
+
         public static MusicIntroLoop Corneria;
+
+        public static MusicIntroLoop Asteroid;
     }
 
     /// <summary>
@@ -55,6 +62,8 @@ namespace StarFox2D.Classes
 
         public TimeSpan FadeoutTimeRemaining { get; private set; }
 
+        private float FadeoutTimeTotal;
+
 
         public MusicIntroLoop(SoundEffect mainSection, SoundEffect intro = null)
         {
@@ -78,6 +87,7 @@ namespace StarFox2D.Classes
 
         public void Start()
         {
+            ChangeVolume();  // reset volume
             if (HasIntro)
             {
                 IntroInstance.Play();
@@ -104,13 +114,14 @@ namespace StarFox2D.Classes
         {
             if (State == MusicState.FadingOut)
             {
-                // TODO
                 FadeoutTimeRemaining -= gameTime.ElapsedGameTime;
                 if (FadeoutTimeRemaining < TimeSpan.Zero)
                     Stop();
                 else
                 {
-
+                    if (HasIntro)
+                        IntroInstance.Volume = Math.Max(IntroInstance.Volume - (float)gameTime.ElapsedGameTime.TotalSeconds * Sounds.MusicVolume / FadeoutTimeTotal, 0);
+                    MainSectionInstance.Volume = Math.Max(MainSectionInstance.Volume - (float)gameTime.ElapsedGameTime.TotalSeconds * Sounds.MusicVolume / FadeoutTimeTotal, 0);
                 }
             }
             else if (State == MusicState.PlayingIntro)
@@ -132,13 +143,14 @@ namespace StarFox2D.Classes
             }
             MainSectionInstance.Stop();
 
-            State = MusicState.Stopped;
             IntroTimeSpent = TimeSpan.Zero;
+            State = MusicState.Stopped;
         }
 
         public void FadeOut(int seconds = 2)
         {
             State = MusicState.FadingOut;
+            FadeoutTimeTotal = seconds;
             FadeoutTimeRemaining = new TimeSpan(0, 0, seconds);
         }
     }

@@ -8,8 +8,8 @@ namespace StarFox2D.Classes
 {
     public class RoundEnemy : RoundObject
     {
-        public RoundEnemy(int health, ObjectID id, int damage, int score, int radius, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
-            : base(health, id, damage, score, radius, mainTexture, additionalTextures, bulletEffects)
+        public RoundEnemy(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, Effects bulletEffects = null)
+            : base(health, id, damage, score, radius, texture, bulletEffects)
         {
             Radius = radius;
         }
@@ -21,7 +21,7 @@ namespace StarFox2D.Classes
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MainTexture, Position, null, Color.White, MainTextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / MainTexture.Width), SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, Position, null, Color.White, TextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / Texture.Width), SpriteEffects.None, 0f);
 
             // TODO draw shield and effects
         }

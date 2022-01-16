@@ -10,8 +10,8 @@ namespace StarFox2D.Classes
     {
         public int SideLength { get; protected set; }
 
-        public SquareObject(int health, ObjectID id, int damage, int score, int sideLength, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
-            : base(health, id, damage, score, mainTexture, additionalTextures, bulletEffects) 
+        public SquareObject(int health, ObjectID id, int damage, int score, int sideLength, Texture2D texture, Effects bulletEffects = null)
+            : base(health, id, damage, score, texture, bulletEffects) 
         {
             SideLength = sideLength;
         }
@@ -23,7 +23,7 @@ namespace StarFox2D.Classes
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MainTexture, Position, null, Color.White, MainTextureRotation, TextureOriginPosition, new Vector2((float)SideLength / MainTexture.Width), SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, Position, null, Color.White, TextureRotation, TextureOriginPosition, new Vector2((float)SideLength / Texture.Width), SpriteEffects.None, 0f);
 
             // TODO draw effects
         }

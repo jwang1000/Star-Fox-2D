@@ -145,6 +145,18 @@
 /processorParam:TextureFormat=Color
 /build:background.jpg
 
+#begin Button.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Button.png
+
 #begin Circle.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -218,6 +230,13 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:FontRegular.spritefont
+
+#begin FontSmall.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:FontSmall.spritefont
 
 #begin FontTitle.spritefont
 /importer:FontDescriptionImporter
@@ -297,6 +316,18 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:music/CorneriaIntro.wav
+
+#begin music/MapSelect.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/MapSelect.wav
+
+#begin music/Title.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/Title.wav
 
 #begin queen.png
 /importer:TextureImporter

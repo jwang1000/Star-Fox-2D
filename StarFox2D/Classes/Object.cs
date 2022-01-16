@@ -51,30 +51,22 @@ namespace StarFox2D.Classes
 
         public ObjectID ID { get; private set; }
 
-        public Texture2D MainTexture { get; private set; }
-
-        public List<Texture2D> AdditionalTextures { get; private set; }
+        public Texture2D Texture { get; private set; }
 
         /// <summary>
         /// The origin position of the texture. Should be set to the centre of the texture.
         /// </summary>
         public Vector2 TextureOriginPosition { get; protected set; }
 
-        public List<Vector2> AdditionalTextureOriginPositions { get; protected set; }
-
         /// <summary>
         /// The speed of the rotation of the texture.
         /// </summary>
-        public float MainTextureRotationSpeed { get; set; }
+        public float TextureRotationSpeed { get; set; }
 
-        public List<float> AdditionalTexturesRotationSpeed { get; set; }
-
-        protected float MainTextureRotation { get; set; }
-
-        protected List<float> AdditionalTexturesRotation { get; set; }
+        protected float TextureRotation { get; set; }
 
 
-        public Object(int health, ObjectID id, int damage, int score, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
+        public Object(int health, ObjectID id, int damage, int score, Texture2D texture, Effects bulletEffects = null)
         {
             Health = health;
             MaxHealth = health;
@@ -82,12 +74,12 @@ namespace StarFox2D.Classes
             Damage = damage;
             Score = score;
             IsAlive = true;
-            MainTexture = mainTexture;
-            MainTextureRotationSpeed = 0f;
-            AdditionalTexturesRotationSpeed = new List<float>();
+            Texture = texture;
+            TextureRotationSpeed = 0f;
 
-            TextureOriginPosition = new Vector2(MainTexture.Width / 2, MainTexture.Height / 2);
+            TextureOriginPosition = new Vector2(Texture.Width / 2, Texture.Height / 2);
 
+            /*
             AdditionalTextureOriginPositions = new List<Vector2>();
             if (additionalTextures is null)
             {
@@ -101,6 +93,7 @@ namespace StarFox2D.Classes
                     AdditionalTextureOriginPositions.Add(new Vector2(t.Width / 2, t.Height / 2));
                 }
             }
+            */
 
             if (bulletEffects is null)
                 BulletEffects = new Effects();
@@ -121,7 +114,7 @@ namespace StarFox2D.Classes
         /// <param name="spriteBatch"></param>
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MainTexture, TextureOriginPosition, null, Color.White, MainTextureRotation, new Vector2(MainTexture.Width / 2, MainTexture.Height / 2), Vector2.One, SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, TextureOriginPosition, null, Color.White, TextureRotation, new Vector2(Texture.Width / 2, Texture.Height / 2), Vector2.One, SpriteEffects.None, 0f);
         }
 
         /// <summary>

@@ -15,6 +15,7 @@
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster4.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/aster5.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/background.jpg</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/Button.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/Circle.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/debris1.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/debris2.png</File>
@@ -22,6 +23,7 @@
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/fly.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontLarge.spritefont</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontRegular.spritefont</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontSmall.spritefont</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontTitle.spritefont</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/fox.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/granga.png</File>
@@ -30,6 +32,8 @@
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/mosquito.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/Corneria.wav</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/CorneriaIntro.wav</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/MapSelect.wav</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/Title.wav</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/queen.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/Ring.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/sat1.png</File>
@@ -40,6 +44,10 @@
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/wolfen.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

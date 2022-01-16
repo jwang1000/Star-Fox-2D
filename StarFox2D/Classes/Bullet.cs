@@ -9,8 +9,8 @@ namespace StarFox2D.Classes
 {
     public class Bullet : RoundObject
     {
-        public Bullet(int health, ObjectID id, int damage, int score, int radius, Texture2D mainTexture, Effects bulletEffects = null) 
-            : base(health, id, damage, score, radius, mainTexture, null, bulletEffects) { }
+        public Bullet(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, Effects bulletEffects = null) 
+            : base(health, id, damage, score, radius, texture, bulletEffects) { }
 
         public override void Update(TimeSpan levelTime)
         {

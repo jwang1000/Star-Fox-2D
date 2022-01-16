@@ -18,8 +18,8 @@ namespace StarFox2D.Classes
         /// </summary>
         public int ShieldIncrease { get; private set; }
 
-        public Ring(int health, ObjectID id, int damage, int score, int radius, int healthRestored, int shieldIncrease, Texture2D mainTexture, List<Texture2D> additionalTextures = null, Effects bulletEffects = null)
-            : base(health, id, damage, score, radius, mainTexture, additionalTextures, bulletEffects)
+        public Ring(int health, ObjectID id, int damage, int score, int radius, int healthRestored, int shieldIncrease, Texture2D texture, Effects bulletEffects = null)
+            : base(health, id, damage, score, radius, texture, bulletEffects)
         {
             HealthRestored = healthRestored;
             ShieldIncrease = shieldIncrease;

@@ -41,13 +41,6 @@ namespace StarFox2D
         /// </summary>
         public static TimeSpan CurrentTime;
 
-
-        public static SpriteFont FontRegular;
-
-        public static SpriteFont FontLarge;
-
-        public static SpriteFont FontTitle;
-
         /// <summary>
         /// The speed that objects should move at to appear motionless against the background.
         /// X = 0, Y = 300.
@@ -99,6 +92,11 @@ namespace StarFox2D
         private MusicIntroLoop currentSong;
 
         /// <summary>
+        /// The next song to play. Only contains a song if a transition is occurring, otherwise is null.
+        /// </summary>
+        private MusicIntroLoop nextSong;
+
+        /// <summary>
         /// Set to true once all content is done loading. If this is true, then all textures are ready to use and the
         /// main menu music has already started.
         /// </summary>
@@ -109,7 +107,18 @@ namespace StarFox2D
         /// </summary>
         private List<Button> buttons;
 
+        /// <summary>
+        /// All text that is on screen (which are not part of any other component, i.e. buttons).
+        /// </summary>
+        private List<TextBox> text;
+
         private MouseState mouseState;
+
+        private MouseState lastMouseState;
+
+
+
+        private List<TextBox> mainMenuText;
 
 
 
@@ -123,6 +132,9 @@ namespace StarFox2D
             playerVelocity = Vector2.Zero;
             secondTimer = 0;
             buttons = new List<Button>();
+            text = new List<TextBox>();
+
+            mainMenuText = new List<TextBox>();
         }
 
         protected override void Initialize()
@@ -140,11 +152,10 @@ namespace StarFox2D
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // load media
-            FontRegular = Content.Load<SpriteFont>("FontRegular");
-            FontLarge = Content.Load<SpriteFont>("FontLarge");
-            FontTitle = Content.Load<SpriteFont>("FontTitle");
+            LoadFonts();
             LoadTextures();
             LoadSounds();
+            ChangeMenu(MenuPages.TitleScreen);
         }
 
         protected override void Update(GameTime gameTime)
@@ -158,30 +169,34 @@ namespace StarFox2D
             }
             else if (!allMediaLoaded)
             {
-                // complete final initialization needed
+                // complete any remaining initialization
 
                 // initialize classes that require content (i.e. sprites)
                 backgroundImagePosition = new Vector2(Textures.Background.Width / 2, 0);
                 playerBossBorder = ScreenHeight / 2;
+                lastMouseState = Mouse.GetState();
 
                 StartMusic();
+
+                text = mainMenuText;
 
                 allMediaLoaded = true;
             }
 
             currentSong.Update(gameTime);
+            MusicUpdate();
 
 
             // update buttons
             mouseState = Mouse.GetState();
-            foreach (Button b in buttons)
+            if (mouseState.LeftButton != lastMouseState.LeftButton)
             {
-                if (mouseState.LeftButton == ButtonState.Pressed && b.MouseHoversButton(mouseState.Position.ToVector2()))
-                {
-                    // TEMP testing only
-                    b.Clicked(() => Debug.WriteLine("Clicked!" + CurrentTime));
-                }
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                    MouseLeftClicked();
+                else
+                    MouseLeftReleased();
             }
+            lastMouseState = mouseState;
 
 
             if (playingLevel)
@@ -280,10 +295,12 @@ namespace StarFox2D
             }
 
             // TEMP TESTING
+            /*
             if (gameTime.TotalGameTime > TimeSpan.FromSeconds(1) && !playingLevel)
             {
                 StartLevel(LevelID.Corneria);
-            }
+                text = new List<TextBox>();
+            }*/
 
             base.Update(gameTime);
         }
@@ -293,15 +310,23 @@ namespace StarFox2D
             GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
-            spriteBatch.Begin();
+            spriteBatch.Begin(blendState: BlendState.AlphaBlend);
 
             // Draw background
             spriteBatch.Draw(Textures.Background, backgroundImagePosition, null, Color.White, 0f, new Vector2(Textures.Background.Width/2, Textures.Background.Height/2), Vector2.One, SpriteEffects.None, 0f);
+
+            // All menu text and buttons are handled by the following:
 
             // Draw buttons
             foreach (Button b in buttons)
             {
                 b.Draw(spriteBatch, mouseState.Position.ToVector2());
+            }
+
+            // Draw text
+            foreach (TextBox t in text)
+            {
+                t.Draw(spriteBatch);
             }
 
             if (playingLevel)
@@ -317,20 +342,18 @@ namespace StarFox2D
                 // update background
                 backgroundImagePosition.Y = (backgroundImagePosition.Y + 5) % (Textures.Background.Height / 2);
             }
-            else
-            {
-                spriteBatch.DrawString(FontRegular, "v2.0", new Vector2(10, ScreenHeight - 25), Color.White);
-                switch(page)
-                {
-                    case MenuPages.TitleScreen:
-                        spriteBatch.DrawString(FontTitle, "STAR FOX 2D", new Vector2(50, 50), Color.White);
-                        break;
-                }
-            }
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void LoadFonts()
+        {
+            TextBox.FontSmall = Content.Load<SpriteFont>("FontSmall");
+            TextBox.FontRegular = Content.Load<SpriteFont>("FontRegular");
+            TextBox.FontLarge = Content.Load<SpriteFont>("FontLarge");
+            TextBox.FontTitle = Content.Load<SpriteFont>("FontTitle");
         }
 
 
@@ -380,8 +403,10 @@ namespace StarFox2D
 
                 Textures.Wolfen = Content.Load<Texture2D>("wolfen");
 
-                Textures.Button = new Texture2D(graphics.GraphicsDevice, 1, 1);
-                Textures.Button.SetData(new[] { Color.White });
+                Textures.Button = Content.Load<Texture2D>("Button");
+                // outdated
+                //Textures.Button = new Texture2D(graphics.GraphicsDevice, 1, 1);
+                //Textures.Button.SetData(new[] { Color.White });
 
                 Textures.TexturesAreLoaded = true;
             }
@@ -401,6 +426,10 @@ namespace StarFox2D
                 SoundEffect corneria = Content.Load<SoundEffect>("music/Corneria");
                 Sounds.Corneria = new MusicIntroLoop(corneria, corneriaIntro);
 
+                SoundEffect menuTheme = Content.Load<SoundEffect>("music/Title");
+                SoundEffect mapTheme = Content.Load<SoundEffect>("music/MapSelect");
+                Sounds.Menu = new MusicIntroLoop(mapTheme, menuTheme);
+
                 Sounds.SoundsAreLoaded = true;
             }
             catch (Exception e)
@@ -416,15 +445,57 @@ namespace StarFox2D
         /// </summary>
         private void StartMusic()
         {
-            // TESTING play corneria and loop properly
-            currentSong = Sounds.Corneria;
+            currentSong = Sounds.Menu;
             currentSong.Start();
+            nextSong = null;
+        }
+
+        /// <summary>
+        /// Handles transitioning between songs.
+        /// </summary>
+        private void MusicUpdate()
+        {
+            if (nextSong != null)
+            {
+                if (currentSong.State == MusicIntroLoop.MusicState.Stopped)
+                {
+                    currentSong = nextSong;
+                    currentSong.Start();
+                    nextSong = null;
+                }
+                else if (currentSong.State != MusicIntroLoop.MusicState.FadingOut)
+                {
+                    currentSong.FadeOut();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a button is pressed to go to another menu. Fills the button and text lists.
+        /// </summary>
+        private void ChangeMenu(MenuPages page)
+        {
+            mainMenuText.Clear();
+            buttons.Clear();
+            switch (page)
+            {
+                case MenuPages.TitleScreen:
+                    mainMenuText.Add(new TextBox("v2.0", new Vector2(10, ScreenHeight - 25)));
+                    mainMenuText.Add(new TextBox("STAR FOX 2D", new Vector2(70, 50), FontSize.Title));
+
+                    // temp - change to level select button after
+                    buttons.Add(new Button(new Vector2(250, 395), 200, 50, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "Start Game"));
+                    break;
+            }
         }
 
         private void StartLevel(LevelID level)
         {
+            mainMenuText.Clear();
+            buttons.Clear();
             CurrentTime = TimeSpan.Zero;
             CurrentLevel = new Level(level);
+            nextSong = CurrentLevel.LevelMusic;  // begins the transition process for music
 
             // initialize Player
             // TEMP implement shield formula later
@@ -438,9 +509,43 @@ namespace StarFox2D
 
 
             // TEMP
-            buttons.Add(new Button(new Vector2(250, 200), 45, 45, Color.White, Color.AliceBlue, Textures.Button, Textures.Button));
+            buttons.Add(new Button(new Vector2(250, 200), 45, 45, () => Debug.WriteLine("Clicked!" + CurrentTime), Textures.Button));
 
             playingLevel = true;
+        }
+
+        /// <summary>
+        /// Called once when the left mouse button is clicked.
+        /// </summary>
+        private void MouseLeftClicked()
+        {
+            // fire player bullets here TODO
+            if (playingLevel)
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// Called once when the left mouse button is released.
+        /// </summary>
+        private void MouseLeftReleased()
+        {
+            // check for button presses here
+            try
+            {
+                foreach (Button b in buttons)
+                {
+                    if (b.MouseHoversButton(mouseState.Position.ToVector2()))
+                    {
+                        b.Clicked();
+                    }
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                Debug.WriteLine("Buttons list was modified as it was looping - this should only happen on changing menus or loading a level");
+            }
         }
     }
 

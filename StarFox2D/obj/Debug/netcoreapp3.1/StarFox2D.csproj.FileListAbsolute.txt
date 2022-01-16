@@ -59,3 +59,7 @@ C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcorea
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaIntro.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\Corneria.ogg
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaIntro.ogg
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\FontSmall.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\Button.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\MapSelect.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\Title.xnb

@@ -46,7 +46,7 @@ namespace StarFox2D.Classes
             new ScreenText("Once Andross hears about this, you're", new Vector2(40, 370)),
             new ScreenText("through, you hear me? Through!", new Vector2(70, 400))
         };
-        public static readonly FullLevelDetails Corneria = new FullLevelDetails(corneriaObjectSpawns, corneriaBossSpawns, corneriaStartText, corneriaEndText);
+        public static readonly FullLevelDetails Corneria = new FullLevelDetails(Sounds.Corneria, corneriaObjectSpawns, corneriaBossSpawns, corneriaStartText, corneriaEndText);
 
 
 
@@ -71,6 +71,8 @@ namespace StarFox2D.Classes
 
     public struct FullLevelDetails
     {
+        public MusicIntroLoop Music;
+
         /// <summary>
         /// Which object should be spawned next. Spawning is finished if this equals the length of ObjectsToSpawn.
         /// </summary>
@@ -87,8 +89,9 @@ namespace StarFox2D.Classes
 
         public ScreenText[] BossEndText;
 
-        public FullLevelDetails(ObjectSpawn[] objectsToSpawn, ObjectID[] bossesToSpawn, ScreenText[] bossStartText, ScreenText[] bossEndText)
+        public FullLevelDetails(MusicIntroLoop music, ObjectSpawn[] objectsToSpawn, ObjectID[] bossesToSpawn, ScreenText[] bossStartText, ScreenText[] bossEndText)
         {
+            Music = music;
             SpawnIndex = 0;
             ObjectsToSpawn = objectsToSpawn;
             BossesToSpawn = bossesToSpawn;
