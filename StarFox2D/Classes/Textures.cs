@@ -51,7 +51,6 @@ namespace StarFox2D.Classes
 
         public static Texture2D Wolfen;
 
-        // TODO blank button doesn't centre properly, replace with sprite
         public static Texture2D Button;
     }
 }

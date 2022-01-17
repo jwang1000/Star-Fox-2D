@@ -6,6 +6,7 @@ using StarFox2D.Classes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace StarFox2D
 {
@@ -68,7 +69,7 @@ namespace StarFox2D
         /// </summary>
         private Vector2 backgroundImagePosition;
 
-        private MenuPages page;
+        private MenuPages menuPage;
 
         private float elapsedSeconds;
 
@@ -128,7 +129,7 @@ namespace StarFox2D
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             playingLevel = false;
-            page = MenuPages.TitleScreen;
+            menuPage = MenuPages.TitleScreen;
             playerVelocity = Vector2.Zero;
             secondTimer = 0;
             buttons = new List<Button>();
@@ -151,18 +152,17 @@ namespace StarFox2D
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // load media
+            // load fonts synchronously to draw text
+            // TODO may need to load one or two sprites for loading screen animation
             LoadFonts();
-            LoadTextures();
-            LoadSounds();
-            ChangeMenu(MenuPages.TitleScreen);
+
+            // asynchronously load textures and sounds
+            ThreadPool.QueueUserWorkItem(LoadTextures);
+            ThreadPool.QueueUserWorkItem(LoadSounds);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
             if (!Textures.TexturesAreLoaded || !Sounds.SoundsAreLoaded)
             {
                 return;
@@ -170,6 +170,7 @@ namespace StarFox2D
             else if (!allMediaLoaded)
             {
                 // complete any remaining initialization
+                ChangeMenu(MenuPages.TitleScreen);
 
                 // initialize classes that require content (i.e. sprites)
                 backgroundImagePosition = new Vector2(Textures.Background.Width / 2, 0);
@@ -308,9 +309,15 @@ namespace StarFox2D
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-
-            // TODO: Add your drawing code here
             spriteBatch.Begin(blendState: BlendState.AlphaBlend);
+
+            if (!Textures.TexturesAreLoaded || !Sounds.SoundsAreLoaded)
+            {
+                spriteBatch.DrawString(TextBox.FontLarge, "Loading...", new Vector2(175, ScreenHeight / 2 - TextBox.FontLarge.LineSpacing), Color.White);
+                spriteBatch.End();
+                base.Draw(gameTime);
+                return;
+            }
 
             // Draw background
             spriteBatch.Draw(Textures.Background, backgroundImagePosition, null, Color.White, 0f, new Vector2(Textures.Background.Width/2, Textures.Background.Height/2), Vector2.One, SpriteEffects.None, 0f);
@@ -342,6 +349,16 @@ namespace StarFox2D
                 // update background
                 backgroundImagePosition.Y = (backgroundImagePosition.Y + 5) % (Textures.Background.Height / 2);
             }
+            else
+            {
+                // used for drawing additional graphics in various menus
+                switch(menuPage)
+                {
+                    case MenuPages.TitleScreen:
+                        spriteBatch.Draw(Textures.ArwingFront, new Vector2(255, 242), null, Color.White, 0, new Vector2(Textures.ArwingFront.Width/2), new Vector2((float)275 / Textures.ArwingFront.Width), SpriteEffects.None, 0f);
+                        break;
+                }
+            }
 
             spriteBatch.End();
 
@@ -351,13 +368,14 @@ namespace StarFox2D
         private void LoadFonts()
         {
             TextBox.FontSmall = Content.Load<SpriteFont>("FontSmall");
+            TextBox.FontMedium = Content.Load<SpriteFont>("FontMedium");
             TextBox.FontRegular = Content.Load<SpriteFont>("FontRegular");
             TextBox.FontLarge = Content.Load<SpriteFont>("FontLarge");
             TextBox.FontTitle = Content.Load<SpriteFont>("FontTitle");
         }
 
 
-        private void LoadTextures()
+        private void LoadTextures(object state)
         {
             try
             {
@@ -418,7 +436,7 @@ namespace StarFox2D
             }
         }
 
-        private void LoadSounds()
+        private void LoadSounds(object state)
         {
             try
             {
@@ -429,6 +447,14 @@ namespace StarFox2D
                 SoundEffect menuTheme = Content.Load<SoundEffect>("music/Title");
                 SoundEffect mapTheme = Content.Load<SoundEffect>("music/MapSelect");
                 Sounds.Menu = new MusicIntroLoop(mapTheme, menuTheme);
+
+                SoundEffect asteroidIntro = Content.Load<SoundEffect>("music/AsteroidIntro");
+                SoundEffect asteroid = Content.Load<SoundEffect>("music/Asteroid");
+                Sounds.Asteroid = new MusicIntroLoop(asteroid, asteroidIntro);
+
+                SoundEffect meteoIntro = Content.Load<SoundEffect>("music/CorneriaZeroIntro");
+                SoundEffect meteo = Content.Load<SoundEffect>("music/CorneriaZero");
+                Sounds.Meteo = new MusicIntroLoop(meteo, meteoIntro);
 
                 Sounds.SoundsAreLoaded = true;
             }
@@ -477,16 +503,56 @@ namespace StarFox2D
         {
             mainMenuText.Clear();
             buttons.Clear();
+            Button.ClickAction backButtonAction = () => ChangeMenu(MenuPages.TitleScreen);
+            Vector2 backButtonPosition = new Vector2(375, 700);
+            string backButtonText = "Back";
             switch (page)
             {
                 case MenuPages.TitleScreen:
-                    mainMenuText.Add(new TextBox("v2.0", new Vector2(10, ScreenHeight - 25)));
                     mainMenuText.Add(new TextBox("STAR FOX 2D", new Vector2(70, 50), FontSize.Title));
 
-                    // temp - change to level select button after
-                    buttons.Add(new Button(new Vector2(250, 395), 200, 50, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "Start Game"));
+                    buttons.Add(new Button(new Vector2(250, 400), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.LevelSelect), Textures.Button, text: "Level Select"));
+                    buttons.Add(new Button(new Vector2(250, 490), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.Settings), Textures.Button, text: "Settings"));
+                    buttons.Add(new Button(new Vector2(250, 580), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.Help), Textures.Button, text: "Help"));
+                    buttons.Add(new Button(new Vector2(250, 670), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.About), Textures.Button, text: "About"));
+                    backButtonPosition = new Vector2(425, 775);
+                    backButtonText = "Exit";
+                    backButtonAction = () => Exit();
+                    break;
+
+                case MenuPages.Settings:
+                    break;
+
+                case MenuPages.Help:
+                    break;
+
+                case MenuPages.About:
+                    mainMenuText.Add(new TextBox("About", new Vector2(25, 50), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
+
+                    mainMenuText.Add(new TextBox("Written by Jonathan Wang, Jan. 1 - 2021. Original version written Mar. 9 - May 24, 2017.", 
+                        new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    mainMenuText.Add(new TextBox("Thanks to Ms. Stusiak, Richard Gan, and Andrew Luo for help with many various issues in the original!",
+                        new Vector2(25, 250), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    mainMenuText.Add(new TextBox("This game was (re)written as a technical exercise to learn Monogame. I do not own any of the images, characters, music, or any other IP that appears in this game. " +
+                        "All rights belong to their rightful owners, namely Nintendo.",
+                        new Vector2(30, 400), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    mainMenuText.Add(new TextBox("There is no auto-click option in this game as it would make it too easy. Yes, I did extensive testing. Enjoy tendinitis. :)",
+                        new Vector2(25, 550), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    break;
+
+                case MenuPages.LevelSelect:
+                    buttons.Add(new Button(new Vector2(160, 160), 75, 75, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "1"));
+                    break;
+
+                case MenuPages.BackgroundStory:
+                    backButtonAction = () => ChangeMenu(MenuPages.LevelSelect);
                     break;
             }
+
+            mainMenuText.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
+            buttons.Add(new Button(backButtonPosition, 150, 50, Color.Gray, Color.DarkGray, backButtonAction, Textures.Button, text: backButtonText));
+
+            menuPage = page;
         }
 
         private void StartLevel(LevelID level)

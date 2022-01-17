@@ -224,6 +224,13 @@
 /processorParam:TextureFormat=Compressed
 /build:FontLarge.spritefont
 
+#begin FontMedium.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:FontMedium.spritefont
+
 #begin FontRegular.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -305,6 +312,18 @@
 /processorParam:TextureFormat=Color
 /build:mosquito.png
 
+#begin music/Asteroid.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/Asteroid.wav
+
+#begin music/AsteroidIntro.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/AsteroidIntro.wav
+
 #begin music/Corneria.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -316,6 +335,18 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:music/CorneriaIntro.wav
+
+#begin music/CorneriaZero.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/CorneriaZero.wav
+
+#begin music/CorneriaZeroIntro.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/CorneriaZeroIntro.wav
 
 #begin music/MapSelect.wav
 /importer:WavImporter

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace StarFox2D.Classes
@@ -12,6 +13,8 @@ namespace StarFox2D.Classes
     public class TextBox
     {
         public static SpriteFont FontSmall;
+
+        public static SpriteFont FontMedium;
 
         public static SpriteFont FontRegular;
 
@@ -44,6 +47,11 @@ namespace StarFox2D.Classes
         /// </summary>
         private SpriteFont Font;
 
+        /// <summary>
+        /// The coordinates of the top left of the text.
+        /// </summary>
+        private Vector2 TextPosition;
+
         
         public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size, Vector2 padding, Color colour, float rotation)
         {
@@ -58,6 +66,9 @@ namespace StarFox2D.Classes
             {
                 case FontSize.Small:
                     Font = FontSmall;
+                    break;
+                case FontSize.Medium:
+                    Font = FontMedium;
                     break;
                 case FontSize.Regular:
                     Font = FontRegular;
@@ -74,6 +85,10 @@ namespace StarFox2D.Classes
             {
                 WrapText();
             }
+            else
+            {
+                TextPosition = Position;
+            }
         }
 
         public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size = FontSize.Regular) : this(text, position, dimensions, size, Vector2.Zero, Color.White, 0) { }
@@ -84,7 +99,7 @@ namespace StarFox2D.Classes
         public TextBox(string text, Vector2 position, FontSize size = FontSize.Regular) : this(text, position, Vector2.Zero, size, Vector2.Zero, Color.White, 0) { }
 
         /// <summary>
-        /// Modifies the Text field to add newline characters as necessary to fit the bounds.
+        /// Modifies the Text field to add newline characters as necessary to fit the bounds. Only called if dimensions are given.
         /// </summary>
         private void WrapText()
         {
@@ -93,28 +108,37 @@ namespace StarFox2D.Classes
             float lineWidth = 0f;
             float spaceWidth = Font.MeasureString(" ").X;
 
-            foreach (string word in words)
+            for (int i = 0; i < words.Length; ++i)
             {
+                string word = words[i];
                 Vector2 size = Font.MeasureString(word);
 
-                if (lineWidth + size.X < Dimensions.X)
+                if (lineWidth + size.X >= Dimensions.X)
                 {
-                    sb.Append(word + " ");
-                    lineWidth += size.X + spaceWidth;
+                    sb.Append("\n");
+                    lineWidth = 0;
                 }
-                else
+                sb.Append(word);
+                lineWidth += size.X;
+
+                if (i < words.Length - 1)
                 {
-                    sb.Append("\n" + word + " ");
-                    lineWidth = size.X + spaceWidth;
+                    sb.Append(" ");
+                    lineWidth += spaceWidth;
                 }
             }
 
             Text = sb.ToString();
+            Vector2 textDimensions = Font.MeasureString(Text);
+
+            // set position for text to be centered in the given dimensions
+            TextPosition.X = Position.X + (Dimensions.X - textDimensions.X) / 2;
+            TextPosition.Y = Position.Y + (Dimensions.Y - textDimensions.Y) / 2;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString(Font, Text, Position, Colour, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
+            spriteBatch.DrawString(Font, Text, TextPosition, Colour, Rotation, Vector2.Zero, 1, SpriteEffects.None, 0);
         }
     }
 
@@ -122,6 +146,7 @@ namespace StarFox2D.Classes
     public enum FontSize
     {
         Small,
+        Medium,
         Regular,
         Large,
         Title

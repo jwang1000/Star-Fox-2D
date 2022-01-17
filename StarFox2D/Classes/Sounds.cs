@@ -25,6 +25,8 @@ namespace StarFox2D.Classes
         public static MusicIntroLoop Corneria;
 
         public static MusicIntroLoop Asteroid;
+
+        public static MusicIntroLoop Meteo;  // CorneriaZero
     }
 
     /// <summary>

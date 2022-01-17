@@ -63,3 +63,8 @@ C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcorea
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\Button.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\MapSelect.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\Title.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\FontMedium.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\Asteroid.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\AsteroidIntro.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaZero.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaZeroIntro.xnb
