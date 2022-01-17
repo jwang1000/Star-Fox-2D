@@ -354,6 +354,30 @@
 /processorParam:Quality=Best
 /build:music/MapSelect.wav
 
+#begin music/SectorAlpha.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/SectorAlpha.wav
+
+#begin music/SectorAlphaIntro.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/SectorAlphaIntro.wav
+
+#begin music/StarWolf.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/StarWolf.wav
+
+#begin music/StarWolfIntro.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/StarWolfIntro.wav
+
 #begin music/Title.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

@@ -117,9 +117,7 @@ namespace StarFox2D
 
         private MouseState lastMouseState;
 
-
-
-        private List<TextBox> mainMenuText;
+        private string loadingText;
 
 
 
@@ -134,8 +132,7 @@ namespace StarFox2D
             secondTimer = 0;
             buttons = new List<Button>();
             text = new List<TextBox>();
-
-            mainMenuText = new List<TextBox>();
+            loadingText = "Loading";
         }
 
         protected override void Initialize()
@@ -178,8 +175,6 @@ namespace StarFox2D
                 lastMouseState = Mouse.GetState();
 
                 StartMusic();
-
-                text = mainMenuText;
 
                 allMediaLoaded = true;
             }
@@ -313,7 +308,13 @@ namespace StarFox2D
 
             if (!Textures.TexturesAreLoaded || !Sounds.SoundsAreLoaded)
             {
-                spriteBatch.DrawString(TextBox.FontLarge, "Loading...", new Vector2(175, ScreenHeight / 2 - TextBox.FontLarge.LineSpacing), Color.White);
+                if (gameTime.TotalGameTime.TotalMilliseconds % 1000 < 333)
+                    loadingText = "Loading.";
+                else if (gameTime.TotalGameTime.TotalMilliseconds % 1000 < 667)
+                    loadingText = "Loading..";
+                else
+                    loadingText = "Loading...";
+                spriteBatch.DrawString(TextBox.FontLarge, loadingText, new Vector2(175, ScreenHeight / 2 - TextBox.FontLarge.LineSpacing), Color.White);
                 spriteBatch.End();
                 base.Draw(gameTime);
                 return;
@@ -323,14 +324,10 @@ namespace StarFox2D
             spriteBatch.Draw(Textures.Background, backgroundImagePosition, null, Color.White, 0f, new Vector2(Textures.Background.Width/2, Textures.Background.Height/2), Vector2.One, SpriteEffects.None, 0f);
 
             // All menu text and buttons are handled by the following:
-
-            // Draw buttons
             foreach (Button b in buttons)
             {
                 b.Draw(spriteBatch, mouseState.Position.ToVector2());
             }
-
-            // Draw text
             foreach (TextBox t in text)
             {
                 t.Draw(spriteBatch);
@@ -452,9 +449,17 @@ namespace StarFox2D
                 SoundEffect asteroid = Content.Load<SoundEffect>("music/Asteroid");
                 Sounds.Asteroid = new MusicIntroLoop(asteroid, asteroidIntro);
 
-                SoundEffect meteoIntro = Content.Load<SoundEffect>("music/CorneriaZeroIntro");
-                SoundEffect meteo = Content.Load<SoundEffect>("music/CorneriaZero");
-                Sounds.Meteo = new MusicIntroLoop(meteo, meteoIntro);
+                SoundEffect spaceArmadaIntro = Content.Load<SoundEffect>("music/SectorAlphaIntro");
+                SoundEffect SpaceArmada = Content.Load<SoundEffect>("music/SectorAlpha");
+                Sounds.SpaceArmada = new MusicIntroLoop(SpaceArmada, spaceArmadaIntro);
+
+                SoundEffect meteorIntro = Content.Load<SoundEffect>("music/StarWolfIntro");
+                SoundEffect meteor = Content.Load<SoundEffect>("music/StarWolf");
+                Sounds.Meteor = new MusicIntroLoop(meteor, meteorIntro);
+
+                SoundEffect venomIntro = Content.Load<SoundEffect>("music/CorneriaZeroIntro");
+                SoundEffect venom = Content.Load<SoundEffect>("music/CorneriaZero");
+                Sounds.Venom = new MusicIntroLoop(venom, venomIntro);
 
                 Sounds.SoundsAreLoaded = true;
             }
@@ -501,7 +506,7 @@ namespace StarFox2D
         /// </summary>
         private void ChangeMenu(MenuPages page)
         {
-            mainMenuText.Clear();
+            text.Clear();
             buttons.Clear();
             Button.ClickAction backButtonAction = () => ChangeMenu(MenuPages.TitleScreen);
             Vector2 backButtonPosition = new Vector2(375, 700);
@@ -509,7 +514,7 @@ namespace StarFox2D
             switch (page)
             {
                 case MenuPages.TitleScreen:
-                    mainMenuText.Add(new TextBox("STAR FOX 2D", new Vector2(70, 50), FontSize.Title));
+                    text.Add(new TextBox("STAR FOX 2D", new Vector2(70, 50), FontSize.Title));
 
                     buttons.Add(new Button(new Vector2(250, 400), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.LevelSelect), Textures.Button, text: "Level Select"));
                     buttons.Add(new Button(new Vector2(250, 490), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.Settings), Textures.Button, text: "Settings"));
@@ -521,23 +526,43 @@ namespace StarFox2D
                     break;
 
                 case MenuPages.Settings:
+                    text.Add(new TextBox("Settings", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+
+                    text.Add(new TextBox("Music Volume", new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    text.Add(new TextBox("Sound Effects Volume", new Vector2(25, 250), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    text.Add(new TextBox("Control Scheme", new Vector2(25, 350), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
                     break;
 
                 case MenuPages.Help:
+                    text.Add(new TextBox("Help", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+
+                    text.Add(new TextBox("Use the arrow keys to control the Arwing! Click anywhere on screen to shoot lasers. Destroy enemies and obstacles to get points.",
+                        new Vector2(25, 110), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("Running into enemies, obstacles, or their bullets will deplete your shield health. If your shield drops to 0, it's game over!",
+                        new Vector2(25, 200), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("Press the spacebar to do a barrel roll, which makes you invincible for a short time. You can't shoot while you're rolling though, and you'll need to wait before you can roll again.",
+                        new Vector2(25, 290), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("If you see any rings, you should run into them. They will give you points and restore your shield, and some can have other effects. Find out what they are!",
+                        new Vector2(25, 405), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("There is a boss battle at the end of each level. While in this battle, the Arwing enters All-Range mode, meaning that you can move freely around the screen. " +
+                        "However, while not in All-Range Mode, you can only move left and right.",
+                        new Vector2(25, 520), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("Make sure to read the background story if you're not familiar with Star Fox. It will clear some things up.",
+                        new Vector2(25, 730), new Vector2(ScreenWidth - 50, 100), FontSize.Small, true));
                     break;
 
                 case MenuPages.About:
-                    mainMenuText.Add(new TextBox("About", new Vector2(25, 50), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
+                    text.Add(new TextBox("About", new Vector2(25, 50), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
 
-                    mainMenuText.Add(new TextBox("Written by Jonathan Wang, Jan. 1 - 2021. Original version written Mar. 9 - May 24, 2017.", 
-                        new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    mainMenuText.Add(new TextBox("Thanks to Ms. Stusiak, Richard Gan, and Andrew Luo for help with many various issues in the original!",
-                        new Vector2(25, 250), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    mainMenuText.Add(new TextBox("This game was (re)written as a technical exercise to learn Monogame. I do not own any of the images, characters, music, or any other IP that appears in this game. " +
+                    text.Add(new TextBox("Written by Jonathan Wang, Jan. 1 - 2021. Original version written Mar. 9 - May 24, 2017.", 
+                        new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("Thanks to Ms. Stusiak, Richard Gan, and Andrew Luo for help with many various issues in the original!",
+                        new Vector2(25, 215), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("This game was (re)written as a technical exercise to learn Monogame. I do not own any of the images, characters, music, or any other IP that appears in this game. " +
                         "All rights belong to their rightful owners, namely Nintendo.",
-                        new Vector2(30, 400), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    mainMenuText.Add(new TextBox("There is no auto-click option in this game as it would make it too easy. Yes, I did extensive testing. Enjoy tendinitis. :)",
-                        new Vector2(25, 550), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                        new Vector2(25, 310), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("There is no auto-click option in this game as it would make it too easy. Yes, I did extensive testing. Enjoy tendinitis. :)",
+                        new Vector2(25, 460), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
                     break;
 
                 case MenuPages.LevelSelect:
@@ -549,7 +574,7 @@ namespace StarFox2D
                     break;
             }
 
-            mainMenuText.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
+            text.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
             buttons.Add(new Button(backButtonPosition, 150, 50, Color.Gray, Color.DarkGray, backButtonAction, Textures.Button, text: backButtonText));
 
             menuPage = page;
@@ -557,7 +582,7 @@ namespace StarFox2D
 
         private void StartLevel(LevelID level)
         {
-            mainMenuText.Clear();
+            text.Clear();
             buttons.Clear();
             CurrentTime = TimeSpan.Zero;
             CurrentLevel = new Level(level);

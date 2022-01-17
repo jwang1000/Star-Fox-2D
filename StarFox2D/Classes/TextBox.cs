@@ -52,8 +52,13 @@ namespace StarFox2D.Classes
         /// </summary>
         private Vector2 TextPosition;
 
+        /// <summary>
+        /// Align text to the top left while still keeping word wrap if true. Only checked if Dimensions are given.
+        /// </summary>
+        private bool LeftAlignText;
+
         
-        public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size, Vector2 padding, Color colour, float rotation)
+        public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size, Vector2 padding, Color colour, float rotation, bool leftAlignText = false)
         {
             Text = text;
             Position = position;
@@ -61,6 +66,7 @@ namespace StarFox2D.Classes
             Padding = padding;
             Colour = colour;
             Rotation = rotation;
+            LeftAlignText = leftAlignText;
 
             switch (size)
             {
@@ -91,12 +97,12 @@ namespace StarFox2D.Classes
             }
         }
 
-        public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size = FontSize.Regular) : this(text, position, dimensions, size, Vector2.Zero, Color.White, 0) { }
+        public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size = FontSize.Regular, bool leftAlignText = false) : this(text, position, dimensions, size, Vector2.Zero, Color.White, 0, leftAlignText) { }
 
         /// <summary>
         /// When no dimensions are given, no word wrapping will be performed.
         /// </summary>
-        public TextBox(string text, Vector2 position, FontSize size = FontSize.Regular) : this(text, position, Vector2.Zero, size, Vector2.Zero, Color.White, 0) { }
+        public TextBox(string text, Vector2 position, FontSize size = FontSize.Regular, bool leftAlignText = false) : this(text, position, Vector2.Zero, size, Vector2.Zero, Color.White, 0, leftAlignText) { }
 
         /// <summary>
         /// Modifies the Text field to add newline characters as necessary to fit the bounds. Only called if dimensions are given.
@@ -132,8 +138,15 @@ namespace StarFox2D.Classes
             Vector2 textDimensions = Font.MeasureString(Text);
 
             // set position for text to be centered in the given dimensions
-            TextPosition.X = Position.X + (Dimensions.X - textDimensions.X) / 2;
-            TextPosition.Y = Position.Y + (Dimensions.Y - textDimensions.Y) / 2;
+            if (LeftAlignText)
+            {
+                TextPosition = Position;
+            }
+            else
+            {
+                TextPosition.X = Position.X + (Dimensions.X - textDimensions.X) / 2;
+                TextPosition.Y = Position.Y + (Dimensions.Y - textDimensions.Y) / 2;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)

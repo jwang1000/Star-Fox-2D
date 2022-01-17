@@ -38,6 +38,10 @@
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/CorneriaZero.wav</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/CorneriaZeroIntro.wav</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/MapSelect.wav</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/SectorAlpha.wav</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/SectorAlphaIntro.wav</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/StarWolf.wav</File>
+    <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/StarWolfIntro.wav</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/Title.wav</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/queen.png</File>
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/Ring.png</File>
@@ -49,6 +53,10 @@
     <File>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/wolfen.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

@@ -26,7 +26,11 @@ namespace StarFox2D.Classes
 
         public static MusicIntroLoop Asteroid;
 
-        public static MusicIntroLoop Meteo;  // CorneriaZero
+        public static MusicIntroLoop SpaceArmada;  // SectorAlpha
+
+        public static MusicIntroLoop Meteor;  // StarWolf
+
+        public static MusicIntroLoop Venom;  // CorneriaZero
     }
 
     /// <summary>

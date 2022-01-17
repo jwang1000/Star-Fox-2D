@@ -68,3 +68,7 @@ C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcorea
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\AsteroidIntro.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaZero.xnb
 C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\CorneriaZeroIntro.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\SectorAlpha.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\SectorAlphaIntro.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\StarWolf.xnb
+C:\Users\Jonathan\Documents\Programming\Star-Fox-2D\StarFox2D\bin\Debug\netcoreapp3.1\Content\music\StarWolfIntro.xnb

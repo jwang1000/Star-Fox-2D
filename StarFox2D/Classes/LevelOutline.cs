@@ -12,15 +12,15 @@ namespace StarFox2D.Classes
         {
             switch (levelID)
             {
-                case LevelID.Corneria:
+                case LevelID.Corneria:  // Granga
                     return Corneria;
-                case LevelID.Asteroid:
+                case LevelID.Asteroid:  // Mecha Turret
                     return Asteroid;
-                case LevelID.SpaceArmada:
+                case LevelID.SpaceArmada:  // Granga 2
                     return SpaceArmada;
-                case LevelID.Meteor:
+                case LevelID.Meteor:  // Star Wolf
                     return Meteor;
-                case LevelID.Venom:
+                case LevelID.Venom:  // Andross
                     return Venom;
             }
 
