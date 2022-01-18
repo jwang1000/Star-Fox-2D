@@ -26,9 +26,9 @@ namespace StarFox2D.Classes
 
         public Vector2 HoverTextureOriginPosition { get; private set; }
 
-        public Color Colour { get; private set; }
+        public Color Colour { get; set; }
 
-        public Color HoverColour { get; private set; }
+        public Color HoverColour { get; set; }
 
         /// <summary>
         /// The text for the button (if it has any text).
@@ -57,7 +57,7 @@ namespace StarFox2D.Classes
             Height = height;
             Colour = colour;
             HoverColour = hoverColour;
-            Text = new TextBox(text, new Vector2(Position.X - Width/2, Position.Y - Height/2), new Vector2(Width, Height), FontSize.Regular, new Vector2(5), Color.White, 0);// TODO needs testing
+            Text = new TextBox(text, new Vector2(Position.X - Width/2, Position.Y - Height/2), new Vector2(Width, Height), FontSize.Regular, new Vector2(5), Color.White, 0);
             
             Texture = texture;
             TextureOriginPosition = new Vector2(Texture.Width / 2, Texture.Height / 2);

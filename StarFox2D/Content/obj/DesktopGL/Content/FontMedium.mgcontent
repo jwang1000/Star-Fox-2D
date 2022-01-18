@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/FontMedium.spritefont</SourceFile>
-  <SourceTime>2022-01-16T01:32:26.3454838-08:00</SourceTime>
+  <SourceTime>2022-01-16T21:46:58.4447553-08:00</SourceTime>
   <DestFile>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/bin/DesktopGL/Content/FontMedium.xnb</DestFile>
-  <DestTime>2022-01-16T01:32:31.6184733-08:00</DestTime>
+  <DestTime>2022-01-16T21:47:02.153521-08:00</DestTime>
   <Importer>FontDescriptionImporter</Importer>
   <ImporterTime>2020-08-10T09:17:54-07:00</ImporterTime>
   <Processor>FontDescriptionProcessor</Processor>

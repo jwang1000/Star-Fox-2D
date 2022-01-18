@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/music/CorneriaIntro.wav</SourceFile>
-  <SourceTime>2022-01-09T02:30:42.4918399-08:00</SourceTime>
+  <SourceTime>2022-01-16T21:46:58.7130731-08:00</SourceTime>
   <DestFile>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/bin/DesktopGL/music/CorneriaIntro.xnb</DestFile>
-  <DestTime>2022-01-09T02:34:39.6711573-08:00</DestTime>
+  <DestTime>2022-01-17T19:39:51.984726-08:00</DestTime>
   <Importer>WavImporter</Importer>
   <ImporterTime>2020-08-10T09:17:54-07:00</ImporterTime>
   <Processor>SoundEffectProcessor</Processor>

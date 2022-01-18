@@ -58,10 +58,10 @@ namespace StarFox2D.Classes
         private bool LeftAlignText;
 
         
-        public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size, Vector2 padding, Color colour, float rotation, bool leftAlignText = false)
+        public TextBox(string text, Vector2 topLeftPosition, Vector2 dimensions, FontSize size, Vector2 padding, Color colour, float rotation, bool leftAlignText = false)
         {
             Text = text;
-            Position = position;
+            Position = topLeftPosition;
             Dimensions = dimensions;
             Padding = padding;
             Colour = colour;
@@ -97,12 +97,18 @@ namespace StarFox2D.Classes
             }
         }
 
-        public TextBox(string text, Vector2 position, Vector2 dimensions, FontSize size = FontSize.Regular, bool leftAlignText = false) : this(text, position, dimensions, size, Vector2.Zero, Color.White, 0, leftAlignText) { }
+        public TextBox(string text, Vector2 topLeftPosition, Vector2 dimensions, FontSize size = FontSize.Regular, bool leftAlignText = false) : this(text, topLeftPosition, dimensions, size, Vector2.Zero, Color.White, 0, leftAlignText) { }
 
         /// <summary>
         /// When no dimensions are given, no word wrapping will be performed.
         /// </summary>
-        public TextBox(string text, Vector2 position, FontSize size = FontSize.Regular, bool leftAlignText = false) : this(text, position, Vector2.Zero, size, Vector2.Zero, Color.White, 0, leftAlignText) { }
+        public TextBox(string text, Vector2 topLeftPosition, FontSize size = FontSize.Regular, bool leftAlignText = false) : this(text, topLeftPosition, Vector2.Zero, size, Vector2.Zero, Color.White, 0, leftAlignText) { }
+
+        public void SetText(string text)
+        {
+            Text = text;
+            WrapText();
+        }
 
         /// <summary>
         /// Modifies the Text field to add newline characters as necessary to fit the bounds. Only called if dimensions are given.

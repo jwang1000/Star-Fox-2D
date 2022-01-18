@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/mosquito.png</SourceFile>
-  <SourceTime>2022-01-01T15:59:55.3368204-08:00</SourceTime>
+  <SourceTime>2022-01-16T21:46:58.4806374-08:00</SourceTime>
   <DestFile>C:/Users/Jonathan/Documents/Programming/Star-Fox-2D/StarFox2D/Content/bin/DesktopGL/Content/mosquito.xnb</DestFile>
-  <DestTime>2022-01-01T16:47:22.5049714-08:00</DestTime>
+  <DestTime>2022-01-16T21:47:02.3155985-08:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2020-08-10T09:17:54-07:00</ImporterTime>
   <Processor>TextureProcessor</Processor>

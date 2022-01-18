@@ -105,8 +105,14 @@ namespace StarFox2D
 
         /// <summary>
         /// All buttons that currently exist on screen. Add to and remove from list as needed.
+        /// Does not include sliders for the settings menu.
         /// </summary>
         private List<Button> buttons;
+
+        /// <summary>
+        /// All sliders in the settings menu.
+        /// </summary>
+        private List<Slider> settingsSliders;
 
         /// <summary>
         /// All text that is on screen (which are not part of any other component, i.e. buttons).
@@ -114,10 +120,15 @@ namespace StarFox2D
         private List<TextBox> text;
 
         private MouseState mouseState;
-
         private MouseState lastMouseState;
 
         private string loadingText;
+        private ControlScheme controlScheme;
+        private Button WASDControlScheme;
+        private Button ArrowKeysControlScheme;
+        private Color WASDControlSchemeButtonColour;
+        private Color ArrowKeysControlSchemeButtonColour;
+        private TextBox ControlSchemeDescription;
 
 
 
@@ -126,11 +137,14 @@ namespace StarFox2D
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
             playingLevel = false;
             menuPage = MenuPages.TitleScreen;
             playerVelocity = Vector2.Zero;
             secondTimer = 0;
+
             buttons = new List<Button>();
+            settingsSliders = new List<Slider>();
             text = new List<TextBox>();
             loadingText = "Loading";
         }
@@ -168,6 +182,8 @@ namespace StarFox2D
             {
                 // complete any remaining initialization
                 ChangeMenu(MenuPages.TitleScreen);
+                CreatePersistentMenuItems();
+                SetControlScheme(ControlScheme.WASD);
 
                 // initialize classes that require content (i.e. sprites)
                 backgroundImagePosition = new Vector2(Textures.Background.Width / 2, 0);
@@ -191,6 +207,13 @@ namespace StarFox2D
                     MouseLeftClicked();
                 else
                     MouseLeftReleased();
+            }
+            else
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    MouseLeftHold();
+                }
             }
             lastMouseState = mouseState;
 
@@ -354,6 +377,15 @@ namespace StarFox2D
                     case MenuPages.TitleScreen:
                         spriteBatch.Draw(Textures.ArwingFront, new Vector2(255, 242), null, Color.White, 0, new Vector2(Textures.ArwingFront.Width/2), new Vector2((float)275 / Textures.ArwingFront.Width), SpriteEffects.None, 0f);
                         break;
+                    case MenuPages.Settings:
+                        foreach (Slider s in settingsSliders)
+                        {
+                            s.Draw(spriteBatch, mouseState.Position.ToVector2());
+                        }
+                        break;
+                    case MenuPages.BackgroundStory:
+                        spriteBatch.Draw(Textures.FoxMcCloud, new Vector2(146, 630), null, Color.White, 0, new Vector2(Textures.FoxMcCloud.Width / 2), new Vector2((float)275 / Textures.FoxMcCloud.Width), SpriteEffects.None, 0f);
+                        break;
                 }
             }
 
@@ -502,6 +534,18 @@ namespace StarFox2D
         }
 
         /// <summary>
+        /// Creates sliders and all menu items (text, buttons) that need to be modified later or should only be created once.
+        /// </summary>
+        private void CreatePersistentMenuItems()
+        {
+            settingsSliders.Add(new Slider(new Vector2(ScreenWidth / 2, 230), ScreenWidth - 100, 30, 15, (float value) => Sounds.SoundEffectVolume = value, Textures.FilledCircle, Textures.Button, startValue: Sounds.SoundEffectVolume));
+            settingsSliders.Add(new Slider(new Vector2(ScreenWidth / 2, 360), ScreenWidth - 100, 30, 15, (float value) => SetMusicVolume(value), Textures.FilledCircle, Textures.Button, startValue: Sounds.MusicVolume));
+            WASDControlScheme = new Button(new Vector2(150, 500), 160, 50, WASDControlSchemeButtonColour, Color.CornflowerBlue, () => SetControlScheme(ControlScheme.WASD), Textures.Button, text: "WASD");
+            ArrowKeysControlScheme = new Button(new Vector2(ScreenWidth - 150, 500), 160, 50, ArrowKeysControlSchemeButtonColour, Color.CornflowerBlue, () => SetControlScheme(ControlScheme.ArrowKeys), Textures.Button, text: "Arrow Keys");
+            ControlSchemeDescription = new TextBox("", new Vector2(0, 525), new Vector2(ScreenWidth, 100), FontSize.Medium);
+        }
+
+        /// <summary>
         /// Called when a button is pressed to go to another menu. Fills the button and text lists.
         /// </summary>
         private void ChangeMenu(MenuPages page)
@@ -528,19 +572,35 @@ namespace StarFox2D
                 case MenuPages.Settings:
                     text.Add(new TextBox("Settings", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
-                    text.Add(new TextBox("Music Volume", new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    text.Add(new TextBox("Sound Effects Volume", new Vector2(25, 250), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    text.Add(new TextBox("Control Scheme", new Vector2(25, 350), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    text.Add(new TextBox("Sound Effects Volume", new Vector2(25, 130), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    text.Add(new TextBox("Music Volume", new Vector2(25, 260), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    text.Add(new TextBox("Control Scheme", new Vector2(25, 390), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    text.Add(ControlSchemeDescription);
+
+                    buttons.Add(WASDControlScheme);
+                    buttons.Add(ArrowKeysControlScheme);
                     break;
 
                 case MenuPages.Help:
                     text.Add(new TextBox("Help", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
-                    text.Add(new TextBox("Use the arrow keys to control the Arwing! Click anywhere on screen to shoot lasers. Destroy enemies and obstacles to get points.",
+                    string controlType;
+                    string rollKey;
+                    if (controlScheme == ControlScheme.WASD)
+                    {
+                        controlType = "WASD";
+                        rollKey = "the spacebar";
+                    }
+                    else
+                    {
+                        controlType = "the arrow keys";
+                        rollKey = "RCTRL";
+                    }
+                    text.Add(new TextBox("Use " + controlType + " to control the Arwing! Click anywhere on screen to shoot lasers. Destroy enemies and obstacles to get points.",
                         new Vector2(25, 110), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
                     text.Add(new TextBox("Running into enemies, obstacles, or their bullets will deplete your shield health. If your shield drops to 0, it's game over!",
                         new Vector2(25, 200), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("Press the spacebar to do a barrel roll, which makes you invincible for a short time. You can't shoot while you're rolling though, and you'll need to wait before you can roll again.",
+                    text.Add(new TextBox("Press " + rollKey + " to do a barrel roll, which makes you invincible for a short time. You can't shoot while you're rolling though, and you'll need to wait before you can roll again.",
                         new Vector2(25, 290), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
                     text.Add(new TextBox("If you see any rings, you should run into them. They will give you points and restore your shield, and some can have other effects. Find out what they are!",
                         new Vector2(25, 405), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
@@ -552,7 +612,7 @@ namespace StarFox2D
                     break;
 
                 case MenuPages.About:
-                    text.Add(new TextBox("About", new Vector2(25, 50), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
+                    text.Add(new TextBox("About", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
 
                     text.Add(new TextBox("Written by Jonathan Wang, Jan. 1 - 2021. Original version written Mar. 9 - May 24, 2017.", 
                         new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
@@ -566,15 +626,47 @@ namespace StarFox2D
                     break;
 
                 case MenuPages.LevelSelect:
-                    buttons.Add(new Button(new Vector2(160, 160), 75, 75, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "1"));
+                    text.Add(new TextBox("Level Select", new Vector2(25, 30), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+
+                    buttons.Add(new Button(new Vector2(ScreenWidth / 2, 125), 300, 40, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.BackgroundStory), Textures.Button, text: "Background Story"));
+
+                    buttons.Add(new Button(new Vector2(150, 225), 75, 75, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "1"));
+                    text.Add(new TextBox("Corneria", new Vector2(75, 260), new Vector2(150, 50), FontSize.Small));
+
+                    // TODO check that each level being added can be played - if not, set colours to gray and don't do anything on click/hover
+                    buttons.Add(new Button(new Vector2(ScreenWidth - 150, 225), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 2"), Textures.Button, text: "2"));
+                    text.Add(new TextBox("Asteroid", new Vector2(ScreenWidth - 225, 260), new Vector2(150, 50), FontSize.Small));
+
+                    buttons.Add(new Button(new Vector2(150, 400), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 3"), Textures.Button, text: "3"));
+                    text.Add(new TextBox("Space Armada", new Vector2(70, 435), new Vector2(150, 50), FontSize.Small));
+
+                    buttons.Add(new Button(new Vector2(ScreenWidth - 150, 400), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 4"), Textures.Button, text: "4"));
+                    text.Add(new TextBox("Meteor", new Vector2(ScreenWidth - 225, 435), new Vector2(150, 50), FontSize.Small));
+
+                    buttons.Add(new Button(new Vector2(ScreenWidth / 2, 575), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 5"), Textures.Button, text: "5"));
+                    text.Add(new TextBox("Venom", new Vector2(ScreenWidth / 2 - 75, 610), new Vector2(150, 50), FontSize.Small));
                     break;
 
                 case MenuPages.BackgroundStory:
+                    text.Add(new TextBox("Background Story", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+
+                    text.Add(new TextBox("The evil lord Andross is threatening the planet Corneria with total destruction. As the elite pilot Fox McCloud, you have been hired to stop him. Take the fight to his lair on the planet " +
+                        "Venom and destroy Andross before it's too late.",
+                        new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("You will meet servants of Andross and mercenaries hired by him along the way.",
+                        new Vector2(25, 300), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
+                    text.Add(new TextBox("Good luck!",
+                        new Vector2(25, 375), new Vector2(ScreenWidth - 50, 100), FontSize.Regular));
+
+                    text.Add(new TextBox("\"I'll do my best. Andross won't have his way with me!\"",
+                        new Vector2(ScreenWidth - 250, 500), new Vector2(200, 100), FontSize.Medium));
+
                     backButtonAction = () => ChangeMenu(MenuPages.LevelSelect);
                     break;
             }
 
-            text.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
+            if (page != MenuPages.BackgroundStory)
+                text.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
             buttons.Add(new Button(backButtonPosition, 150, 50, Color.Gray, Color.DarkGray, backButtonAction, Textures.Button, text: backButtonText));
 
             menuPage = page;
@@ -615,6 +707,28 @@ namespace StarFox2D
             {
 
             }
+            else
+            {
+                foreach (Slider s in settingsSliders)
+                {
+                    if (s.MouseHoversButton(mouseState.Position.ToVector2()))
+                    {
+                        Slider.ActiveSlider = s;
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called while the left mouse button is being held down, but never at the same time as MouseLeftClicked or MouseLeftReleased.
+        /// </summary>
+        private void MouseLeftHold()
+        {
+            if (Slider.ActiveSlider != null)
+            {
+                Slider.ActiveSlider.ChangePosition(mouseState.Position.ToVector2());
+            }
         }
 
         /// <summary>
@@ -623,20 +737,49 @@ namespace StarFox2D
         private void MouseLeftReleased()
         {
             // check for button presses here
-            try
+            if (Slider.ActiveSlider == null)
             {
-                foreach (Button b in buttons)
+                try
                 {
-                    if (b.MouseHoversButton(mouseState.Position.ToVector2()))
+                    foreach (Button b in buttons)
                     {
-                        b.Clicked();
+                        if (b.MouseHoversButton(mouseState.Position.ToVector2()))
+                        {
+                            b.Clicked();
+                        }
                     }
                 }
+                catch (InvalidOperationException)
+                {
+                    Debug.WriteLine("Buttons list was modified as it was looping - this should only happen on changing menus or loading a level");
+                }
             }
-            catch (InvalidOperationException)
+            Slider.ActiveSlider = null;
+        }
+
+        private void SetMusicVolume(float volume)
+        {
+            Sounds.MusicVolume = volume;
+            currentSong.ChangeVolume();
+        }
+
+        private void SetControlScheme(ControlScheme scheme)
+        {
+            controlScheme = scheme;
+            if (scheme == ControlScheme.WASD)
             {
-                Debug.WriteLine("Buttons list was modified as it was looping - this should only happen on changing menus or loading a level");
+                WASDControlSchemeButtonColour = Color.Blue;
+                ArrowKeysControlSchemeButtonColour = Color.Gray;
+                ControlSchemeDescription.SetText("WASD to move, spacebar to roll");
             }
+            else
+            {
+                WASDControlSchemeButtonColour = Color.Gray;
+                ArrowKeysControlSchemeButtonColour = Color.Blue;
+                ControlSchemeDescription.SetText("Arrow keys to move, RCTRL to roll");
+            }
+            WASDControlScheme.Colour = WASDControlSchemeButtonColour;
+            ArrowKeysControlScheme.Colour = ArrowKeysControlSchemeButtonColour;
         }
     }
 
@@ -648,5 +791,11 @@ namespace StarFox2D
         Help,
         Settings,
         About
+    }
+
+    enum ControlScheme
+    {
+        WASD,
+        ArrowKeys
     }
 }
