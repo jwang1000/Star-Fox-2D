@@ -119,8 +119,9 @@ namespace StarFox2D.Classes
 
         /// <summary>
         /// Given a bullet, checks if it is within the collision boundaries for the object and performs the appropriate logic is needed. (Reduce health, apply effect, die)
+        /// Returns true if the bullet collided with something and should be removed. Sets the bullet's IsAlive to false if so.
         /// </summary>
-        public abstract void CheckBulletCollision(Bullet bullet);
+        public abstract bool CheckBulletCollision(Bullet bullet);
 
         /// <summary>
         /// Returns true if the object is fully outside the screen and should be despawned.

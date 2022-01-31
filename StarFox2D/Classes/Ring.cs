@@ -27,7 +27,8 @@ namespace StarFox2D.Classes
 
         public override void Update(TimeSpan levelTime)
         {
-            throw new NotImplementedException();
+            // rings should not need to update
+            return;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -35,17 +36,13 @@ namespace StarFox2D.Classes
             throw new NotImplementedException();
         }
 
-        public override void CheckBulletCollision(Bullet bullet)
+        public override bool CheckBulletCollision(Bullet bullet)
         {
-            throw new NotImplementedException();
+            // nothing should happen for rings
+            return false;
         }
 
         protected override bool OtherObjectIsWithinBoundaries(Object other)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void Death()
         {
             throw new NotImplementedException();
         }

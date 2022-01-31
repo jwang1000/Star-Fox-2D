@@ -30,6 +30,10 @@ namespace StarFox2D.Classes
 
         public Color HoverColour { get; set; }
 
+        public static Color InactiveColour = Color.Gray;
+
+        public bool IsActive { get; set; }
+
         /// <summary>
         /// The text for the button (if it has any text).
         /// </summary>
@@ -58,6 +62,7 @@ namespace StarFox2D.Classes
             Colour = colour;
             HoverColour = hoverColour;
             Text = new TextBox(text, new Vector2(Position.X - Width/2, Position.Y - Height/2), new Vector2(Width, Height), FontSize.Regular, new Vector2(5), Color.White, 0);
+            IsActive = true;
             
             Texture = texture;
             TextureOriginPosition = new Vector2(Texture.Width / 2, Texture.Height / 2);
@@ -106,17 +111,23 @@ namespace StarFox2D.Classes
 
         public void Clicked()
         {
-            clickAction();
+            if (IsActive)
+                clickAction();
         }
 
         public void Clicked(float input)
         {
-            clickActionFloat(input);
+            if (IsActive)
+                clickActionFloat(input);
         }
 
         public void Draw(SpriteBatch spriteBatch, Vector2 mousePosition)
         {
-            if (MouseHoversButton(mousePosition))
+            if (!IsActive)
+            {
+                spriteBatch.Draw(Texture, Position, null, InactiveColour, 0, TextureOriginPosition, new Vector2((float)Width / Texture.Width, (float)Height / Texture.Height), SpriteEffects.None, 0f);
+            }
+            else if (MouseHoversButton(mousePosition))
             {
                 spriteBatch.Draw(HoverTexture, Position, null, HoverColour, 0, HoverTextureOriginPosition, new Vector2((float)Width / HoverTexture.Width, (float)Height / HoverTexture.Height), SpriteEffects.None, 0f);
             }

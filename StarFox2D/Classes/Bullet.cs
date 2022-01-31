@@ -29,15 +29,10 @@ namespace StarFox2D.Classes
             return;
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void CheckBulletCollision(Bullet bullet)
+        public override bool CheckBulletCollision(Bullet bullet)
         {
             // nothing happens for bullets colliding with bullets
-            return;
+            return false;
         }
 
         protected override bool OtherObjectIsWithinBoundaries(Object other)

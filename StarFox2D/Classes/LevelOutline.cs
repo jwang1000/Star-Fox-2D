@@ -34,10 +34,54 @@ namespace StarFox2D.Classes
             return ((long)frames) * 1000000 / 6;  // 1e7 ticks per second, at 60 fps per second (1 zero removed from both for less computation)
         }
 
+        /*
+         * ID VALUES:
+    1 = player
+    2, 4 = Granga, Granga rematch
+    3 = Mecha Turret
+    5 = Star Wolf crew (5.1 = wolf, 5.2 = pigma)
+    6 = Andross (6 = head, 6.1 = left hand, 6.2 = right hand)
+    10 = fly
+    20, 21, 22 = mosquito
+    30 = hornet, three spawn at once
+    40, 41, 42 = queen fly
+    50 = mini andross
+    100, 101, 102 = asteroid (round)
+    110, 111 = small_asteroid (round)
+    120, 121, 122 = debris (round)
+    500, 501, 502 = satellite (square)
+    510, 511, 512 = turret (square)
+    1000, 1001, 1002 = ring (white ring, heal 15)
+    1010, 1011, 1012 = yl_ring (yellow ring, heal 20, increase max shield by 10)
+    1020, 1021, 1022 = gr_ring (green ring, heal 40, increase max shield by 10)
+    1030, 1031, 1032 = re_ring (red ring, heal full, increase max shield by 5)
+    """
+    
+    if level == 1:
+        b_spawn_list = []  # square building spawn list
+        e_spawn_list = [[55, 10], [45, 10], [38, 10], [34, 10], [32, 10], [30, 10], [25, 10],
+                        [23, 10], [22, 10], [18, 10], [15, 10], [10, 10], [7, 10]]  # enemy spawn list
+        rb_spawn_list = [[50, 100], [50, 110], [48, 100], [45, 110], [42, 111], [42, 1000], [40, 111],
+                         [37, 110], [34, 102], [32, 110], [30, 100], [29, 1002], [27, 110], [26, 100],
+                         [26, 101], [26, 110], [25, 110], [24, 100], [22, 102], [22, 110], [21, 111],
+                         [21, 101], [20, 102], [17, 110], [15, 100], [12, 1001], [11, 101]]  # round building and ring spawn list
+         */
 
         private static ObjectSpawn[] corneriaObjectSpawns =
         {
-            new ObjectSpawn(ObjectID.Fly, 55)
+            new ObjectSpawn(ObjectID.Fly, 60),
+            new ObjectSpawn(ObjectID.Fly, 300),
+            new ObjectSpawn(ObjectID.Fly, 300),
+            new ObjectSpawn(ObjectID.Fly, 280),
+            new ObjectSpawn(ObjectID.Fly, 280),
+            new ObjectSpawn(ObjectID.Fly, 260),
+            new ObjectSpawn(ObjectID.Fly, 260),
+            new ObjectSpawn(ObjectID.Fly, 240),
+            new ObjectSpawn(ObjectID.Fly, 240),
+            new ObjectSpawn(ObjectID.Fly, 200),
+            new ObjectSpawn(ObjectID.Fly, 200),
+            new ObjectSpawn(ObjectID.Fly, 180),
+            new ObjectSpawn(ObjectID.Fly, 60)
         };
         private static ObjectID[] corneriaBossSpawns = { ObjectID.Granga };
         private static ScreenText[] corneriaStartText = { new ScreenText("Star Fox! Andross sent me to stop you!", new Vector2(35, 380)) };
@@ -106,17 +150,17 @@ namespace StarFox2D.Classes
         public ObjectID ObjectToSpawn;
 
         /// <summary>
-        /// SpawnTime is given by the time since the last spawn (change from Python version).
-        /// Should be specified in number of frames, not ticks! (Will be converted later)
+        /// TimeSinceLastSpawn is given by the time since the last spawn (change from Python version).
+        /// Should be specified in number of frames (@60FPS), not ticks! (converted in Level.Update)
         /// </summary>
-        public int SpawnTime;
+        public int TimeSinceLastSpawn;
         public int LeftX;
         public int RightX;
 
-        public ObjectSpawn(ObjectID objectToSpawn, int spawnTime, int leftX = 0, int rightX = 0)
+        public ObjectSpawn(ObjectID objectToSpawn, int timeSinceLastSpawn, int leftX = 0, int rightX = 0)
         {
             ObjectToSpawn = objectToSpawn;
-            SpawnTime = spawnTime;
+            TimeSinceLastSpawn = timeSinceLastSpawn;
             LeftX = leftX;
             RightX = rightX;
         }

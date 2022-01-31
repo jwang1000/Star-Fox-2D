@@ -28,7 +28,7 @@ namespace StarFox2D.Classes
             // TODO draw shield and effects
         }
 
-        public override void CheckBulletCollision(Bullet bullet)
+        public override bool CheckBulletCollision(Bullet bullet)
         {
             throw new NotImplementedException();
         }

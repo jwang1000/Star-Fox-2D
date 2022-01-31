@@ -19,14 +19,9 @@ namespace StarFox2D
         public static Player Player;
 
         /// <summary>
-        /// List of all enemies spawned in the level, including bosses.
+        /// List of all Objects (enemies, bosses, buildings) in the level, EXCEPT bullets.
         /// </summary>
-        public static List<Classes.Object> Enemies;
-
-        /// <summary>
-        /// List of all buildings spawned in the level (both round and square), not including enemies.
-        /// </summary>
-        public static List<Classes.Object> Buildings;
+        public static List<Classes.Object> Objects;
 
         /// <summary>
         /// List of all bullets in the level, from players or enemies.
@@ -55,7 +50,9 @@ namespace StarFox2D
         /// <summary>
         /// The number of pixels that an object can be outside the screen without despawning.
         /// </summary>
-        public static readonly int DespawnBuffer = 10;
+        public static readonly int DespawnBuffer = 50;
+
+        public static readonly int baseBulletSpeed = 800;
 
 
         /// <summary>
@@ -143,6 +140,10 @@ namespace StarFox2D
             playerVelocity = Vector2.Zero;
             secondTimer = 0;
 
+            // set defaults, data is loaded later if it exists
+            SaveData.LevelCompleted = 0;
+            SaveData.HighScores = new int[5];
+
             buttons = new List<Button>();
             settingsSliders = new List<Slider>();
             text = new List<TextBox>();
@@ -167,9 +168,10 @@ namespace StarFox2D
             // TODO may need to load one or two sprites for loading screen animation
             LoadFonts();
 
-            // asynchronously load textures and sounds
+            // asynchronously load textures, sounds, save data
             ThreadPool.QueueUserWorkItem(LoadTextures);
             ThreadPool.QueueUserWorkItem(LoadSounds);
+            ThreadPool.QueueUserWorkItem(SaveData.Load);
         }
 
         protected override void Update(GameTime gameTime)
@@ -234,7 +236,7 @@ namespace StarFox2D
                 // get input from player
                 playerVelocity = Vector2.Zero;
 
-                if (CurrentLevel.InBossFight)
+                if (CurrentLevel.State >= LevelState.BossStartText)
                 {
                     if (kstate.IsKeyDown(Keys.W))
                         playerVelocity.Y -= Player.BaseVelocity;
@@ -263,23 +265,40 @@ namespace StarFox2D
                 Player.Position += playerVelocity * elapsedSeconds;
                 Player.Update(CurrentTime);
 
-                foreach (var enemy in Enemies)
+                for (int i = Objects.Count - 1; i >= 0; --i)
                 {
-                    enemy.Position += enemy.Velocity * elapsedSeconds;
-                    enemy.Update(CurrentTime);
+                    var obj = Objects[i];
+                    obj.Position += obj.Velocity * elapsedSeconds;
+                    obj.Update(CurrentTime);
                 }
-                foreach (var building in Buildings)
+                for (int i = Bullets.Count - 1; i >= 0; --i)
                 {
-                    building.Position += building.Velocity * elapsedSeconds;
-                    building.Update(CurrentTime);
-                }
-                foreach (var bullet in Bullets)
-                {
+                    var bullet = Bullets[i];
                     bullet.Position += bullet.Velocity * elapsedSeconds;
                     bullet.Update(CurrentTime);
 
-                    // TODO check bullets against all enemies, buildings, and player
-                    // TODO remove dead objects immediately
+                    if (bullet.ID == ObjectID.EnemyBullet)
+                    {
+                        if (Player.CheckBulletCollision(bullet))
+                            Bullets.RemoveAt(i);
+                    }
+                    else
+                    {
+                        // check player bullets against all enemies, bosses, and buildings
+                        foreach (var obj in Objects)
+                        {
+                            if (obj.CheckBulletCollision(bullet))
+                            {
+                                Bullets.RemoveAt(i);
+                                if (!obj.IsAlive)
+                                {
+                                    Objects.Remove(obj);
+                                    // TODO add special check for boss to trigger level progression
+                                }
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 // all updates that occur once per second are here
@@ -289,18 +308,11 @@ namespace StarFox2D
                     secondTimer -= 1;
 
                     // delete objects that are out of range
-                    for (int i = Enemies.Count - 1; i >= 0; --i)
+                    for (int i = Objects.Count - 1; i >= 0; --i)
                     {
-                        if (Enemies[i].ObjectIsOutsideScreen())
+                        if (Objects[i].ObjectIsOutsideScreen())
                         {
-                            Enemies.RemoveAt(i);
-                        }
-                    }
-                    for (int i = Buildings.Count - 1; i >= 0; --i)
-                    {
-                        if (Buildings[i].ObjectIsOutsideScreen())
-                        {
-                            Buildings.RemoveAt(i);
+                            Objects.RemoveAt(i);
                         }
                     }
                     for (int i = Bullets.Count - 1; i >= 0; --i)
@@ -359,10 +371,8 @@ namespace StarFox2D
             if (playingLevel)
             {
                 Player.Draw(spriteBatch);
-                foreach (var enemy in Enemies)
-                    enemy.Draw(spriteBatch);
-                foreach (var building in Buildings)
-                    building.Draw(spriteBatch);
+                foreach (var obj in Objects)
+                    obj.Draw(spriteBatch);
                 foreach (var bullet in Bullets)
                     bullet.Draw(spriteBatch);
 
@@ -569,6 +579,7 @@ namespace StarFox2D
                     backButtonAction = () => Exit();
                     break;
 
+
                 case MenuPages.Settings:
                     text.Add(new TextBox("Settings", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
@@ -579,7 +590,12 @@ namespace StarFox2D
 
                     buttons.Add(WASDControlScheme);
                     buttons.Add(ArrowKeysControlScheme);
+                    backButtonAction = () => {
+                        SaveData.SaveSettings();
+                        ChangeMenu(MenuPages.TitleScreen);
+                    };
                     break;
+
 
                 case MenuPages.Help:
                     text.Add(new TextBox("Help", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
@@ -611,6 +627,7 @@ namespace StarFox2D
                         new Vector2(25, 730), new Vector2(ScreenWidth - 50, 100), FontSize.Small, true));
                     break;
 
+
                 case MenuPages.About:
                     text.Add(new TextBox("About", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
 
@@ -625,6 +642,7 @@ namespace StarFox2D
                         new Vector2(25, 460), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
                     break;
 
+
                 case MenuPages.LevelSelect:
                     text.Add(new TextBox("Level Select", new Vector2(25, 30), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
@@ -633,19 +651,35 @@ namespace StarFox2D
                     buttons.Add(new Button(new Vector2(150, 225), 75, 75, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "1"));
                     text.Add(new TextBox("Corneria", new Vector2(75, 260), new Vector2(150, 50), FontSize.Small));
 
-                    // TODO check that each level being added can be played - if not, set colours to gray and don't do anything on click/hover
-                    buttons.Add(new Button(new Vector2(ScreenWidth - 150, 225), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 2"), Textures.Button, text: "2"));
+                    Button level2 = new Button(new Vector2(ScreenWidth - 150, 225), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 2"), Textures.Button, text: "2")
+                    {
+                        IsActive = SaveData.LevelCompleted >= 1
+                    };
+                    buttons.Add(level2);
                     text.Add(new TextBox("Asteroid", new Vector2(ScreenWidth - 225, 260), new Vector2(150, 50), FontSize.Small));
 
-                    buttons.Add(new Button(new Vector2(150, 400), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 3"), Textures.Button, text: "3"));
+                    Button level3 = new Button(new Vector2(150, 400), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 3"), Textures.Button, text: "3")
+                    {
+                        IsActive = SaveData.LevelCompleted >= 2
+                    };
+                    buttons.Add(level3);
                     text.Add(new TextBox("Space Armada", new Vector2(70, 435), new Vector2(150, 50), FontSize.Small));
 
-                    buttons.Add(new Button(new Vector2(ScreenWidth - 150, 400), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 4"), Textures.Button, text: "4"));
+                    Button level4 = new Button(new Vector2(ScreenWidth - 150, 400), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 4"), Textures.Button, text: "4")
+                    {
+                        IsActive = SaveData.LevelCompleted >= 3
+                    };
+                    buttons.Add(level4);
                     text.Add(new TextBox("Meteor", new Vector2(ScreenWidth - 225, 435), new Vector2(150, 50), FontSize.Small));
 
-                    buttons.Add(new Button(new Vector2(ScreenWidth / 2, 575), 75, 75, Color.Gray, Color.Gray, () => Debug.WriteLine("Level 5"), Textures.Button, text: "5"));
+                    Button level5 = new Button(new Vector2(ScreenWidth / 2, 575), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 5"), Textures.Button, text: "5")
+                    {
+                        IsActive = SaveData.LevelCompleted >= 4
+                    };
+                    buttons.Add(level5);
                     text.Add(new TextBox("Venom", new Vector2(ScreenWidth / 2 - 75, 610), new Vector2(150, 50), FontSize.Small));
                     break;
+
 
                 case MenuPages.BackgroundStory:
                     text.Add(new TextBox("Background Story", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
@@ -681,18 +715,15 @@ namespace StarFox2D
             nextSong = CurrentLevel.LevelMusic;  // begins the transition process for music
 
             // initialize Player
-            // TEMP implement shield formula later
+            // TEMP implement shield formula later (more shield for later levels)
             int health = 50;
-            Player = new Player(health, ObjectID.Player, 1, 0, 45, Textures.Arwing);
-            Player.Position = new Vector2(250, 625);
+            Player = new Player(health, ObjectID.Player, 1, 0, 45, Textures.Arwing)
+            {
+                Position = new Vector2(250, 625)
+            };
 
-            Enemies = new List<Classes.Object>();
-            Buildings = new List<Classes.Object>();
+            Objects = new List<Classes.Object>();
             Bullets = new List<Bullet>();
-
-
-            // TEMP
-            buttons.Add(new Button(new Vector2(250, 200), 45, 45, () => Debug.WriteLine("Clicked!" + CurrentTime), Textures.Button));
 
             playingLevel = true;
         }
@@ -702,10 +733,15 @@ namespace StarFox2D
         /// </summary>
         private void MouseLeftClicked()
         {
-            // fire player bullets here TODO
             if (playingLevel)
             {
-
+                // fire player bullets here TODO
+                Bullet b = new Bullet(1, ObjectID.PlayerBullet, 10, 0, 3, Textures.FilledCircle)
+                {
+                    Position = new Vector2(Player.Position.X, Player.Position.Y - Player.Radius)
+                };
+                b.Velocity = CalculateBulletVelocity(b.Position, mouseState.Position.ToVector2(), baseBulletSpeed);
+                Bullets.Add(b);
             }
             else
             {
@@ -780,6 +816,26 @@ namespace StarFox2D
             }
             WASDControlScheme.Colour = WASDControlSchemeButtonColour;
             ArrowKeysControlScheme.Colour = ArrowKeysControlSchemeButtonColour;
+        }
+
+        /// <summary>
+        /// Given the start and end positions, calculates the velocity for a bullet to travel at the given speed.
+        /// </summary>
+        public static Vector2 CalculateBulletVelocity(Vector2 startPosition, Vector2 endPosition, float speed)
+        {
+            Vector2 sign = Vector2.One;
+            Vector2 result = new Vector2(speed);
+
+            if (endPosition.X < startPosition.X)
+                sign.X = -1;
+            if (endPosition.Y < startPosition.Y)
+                sign.Y = -1;
+
+            float angle = MathF.Atan2(MathF.Abs(endPosition.Y - startPosition.Y), MathF.Abs(endPosition.X - startPosition.X));
+            result.X *= MathF.Cos(angle) * sign.X;
+            result.Y *= MathF.Sin(angle) * sign.Y;
+
+            return result;
         }
     }
 

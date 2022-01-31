@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,21 +15,29 @@ namespace StarFox2D.Classes
         public LevelID LevelNumber { get; private set; }
 
         /// <summary>
-        /// Whether or not the player has reached the boss fight section of the level.
+        /// What stage the level has progressed to. Spawns objects/the boss accordingly; draw text in MainGame accordingly.
         /// </summary>
-        public bool InBossFight { get; private set; }
+        public LevelState State { get; private set; }
+
+        /// <summary>
+        /// The length of time before spawning can occur at the start of the level. Screen displays "Ready?" at this time, or similar.
+        /// </summary>
+        public TimeSpan TimeBeforeLevelStart { get; private set; }
 
         /// <summary>
         /// The length of time after the last object is spawned before the boss text appears.
-        /// InBossFight is not true during this time.
         /// </summary>
         public TimeSpan TimeBeforeBossText { get; private set; }
 
         /// <summary>
         /// The length of time that the boss text displays for before the boss fight begins.
-        /// InBossFight is true once this time STARTS.
         /// </summary>
-        public TimeSpan BossTextTime { get; private set; }
+        public TimeSpan BossStartTextTime { get; private set; }
+
+        /// <summary>
+        /// The length of time that the boss text displays for after the boss is defeated.
+        /// </summary>
+        public TimeSpan BossEndTextTime { get; private set; }
 
         public MusicIntroLoop LevelMusic { get; private set; }
 
@@ -36,92 +45,217 @@ namespace StarFox2D.Classes
 
         private TimeSpan lastSpawnedObjectTime;
 
-        private bool spawningIsValid;
+        private TimeSpan bossDefeatTime;
 
-        private bool spawningIsDone;
+        private bool spawningIsValid;
 
         private long nextSpawnTimeTicks;
 
 
-        public Level(LevelID levelNumber, int timeBeforeBossTextSeconds = 5)
+        public Level(LevelID levelNumber, int timeBeforeLevelStartSeconds = 3, int timeBeforeBossTextSeconds = 5, int bossStartTextSeconds = 5, int bossEndTextSeconds = 5)
         {
             LevelNumber = levelNumber;
 
             levelDetails = LevelOutline.GetLevelDetails(levelNumber);
-            lastSpawnedObjectTime = new TimeSpan(0);
-            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[0].SpawnTime);
+            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[0].TimeSinceLastSpawn);
             LevelMusic = levelDetails.Music;
 
+            TimeBeforeLevelStart = new TimeSpan(0, 0, timeBeforeLevelStartSeconds);
             TimeBeforeBossText = new TimeSpan(0, 0, timeBeforeBossTextSeconds);
+            BossStartTextTime = new TimeSpan(0, 0, bossStartTextSeconds);
+            BossEndTextTime = new TimeSpan(0, 0, bossEndTextSeconds);
+            State = LevelState.BeforeStart;
+            lastSpawnedObjectTime = TimeBeforeLevelStart;
         }
 
 
 
         public void Update(TimeSpan levelTime)
         {
-            if (!InBossFight)
+            switch (State)
             {
-                if (spawningIsDone)
-                {
-                    if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText)
+                case LevelState.BeforeStart:
+                    if (levelTime >= TimeBeforeLevelStart)
                     {
-                        InBossFight = true;
+                        State = LevelState.Main;
                     }
-                }
-                else
-                {
+                    break;
+
+                case LevelState.Main:
                     spawningIsValid = levelTime.Ticks >= lastSpawnedObjectTime.Ticks + nextSpawnTimeTicks;
 
                     if (spawningIsValid)
                     {
-                        Object o = CreateObject(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].ObjectToSpawn);
-                        if (o is RoundEnemy)
-                            MainGame.Enemies.Add(o);
-                        else
-                            MainGame.Buildings.Add(o);
+                        MainGame.Objects.Add(CreateObject(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].ObjectToSpawn));
 
                         lastSpawnedObjectTime += new TimeSpan(nextSpawnTimeTicks);
                         levelDetails.SpawnIndex++;
 
                         if (levelDetails.SpawnIndex == levelDetails.ObjectsToSpawn.Length)
                         {
-                            spawningIsDone = true;
+                            State = LevelState.DoneSpawning;
                         }
                         else
                         {
-                            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].SpawnTime);
+                            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].TimeSinceLastSpawn);
                         }
                     }
-                }
+                    break;
+
+                case LevelState.DoneSpawning:
+                    if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText)
+                        State = LevelState.BossStartText;
+                    break;
+
+                case LevelState.BossStartText:
+                    if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText + BossStartTextTime)
+                        State = LevelState.BossFight;
+                    break;
+
+                case LevelState.BossFight:
+
+                    break;
+
+                case LevelState.BossEndText:
+                    if (levelTime >= bossDefeatTime + BossEndTextTime)
+                        State = LevelState.Win;
+                    break;
+
+                case LevelState.Win:
+
+                    break;
+
+                case LevelState.Loss:
+
+                    break;
             }
         }
 
 
         /// <summary>
-        /// Given the ID of an object and optional horizontal range it can spawn in, returns an instance of the object.
-        /// TODO remove horizonatal range? Can just have boolean to randomize or not
+        /// Given the ID of an object, returns an instance of the object.
+        /// Does not create bosses.
         /// </summary>
-        public Object CreateObject(ObjectID id, int startX = 0, int endX = 0)
+        public Object CreateObject(ObjectID id)
         {
-            Object o;
+            Object o = new RoundObject(1, ObjectID.Asteroid, 0, 1, 25, Textures.Asteroid1)
+            {
+                Position = new Vector2(250, -30),
+                Velocity = MainGame.BackgroundObjectVelocity
+            };
+            Random random = new Random();
+            int randInt;
+            Vector2 pos;
+            Texture2D texture;
             switch (id)
             {
                 case ObjectID.Fly:
-                    o = new RoundEnemy(2, id, 1, 5, 20, Textures.Fly);
-                    o.Position = new Vector2(250, -10);
-                    o.Velocity = new Vector2(50, 400);
+                    o = new RoundEnemy(2, id, 1, 5, 20, Textures.Fly)
+                    {
+                        Position = new Vector2(250, -10),
+                        Velocity = new Vector2(50, 400)
+                    };
                     break;
 
+                case ObjectID.Mosquito:
+                    break;
+
+                case ObjectID.Hornet:
+                    break;
+
+                case ObjectID.QueenFly:
+                    break;
+
+                case ObjectID.MiniAndross:
+                    break;
+
+                case ObjectID.Asteroid:
+                    randInt = random.Next(1, 3);
+                    pos = new Vector2(150, -30);
+
+                    if (randInt == 1)
+                    {
+                        texture = Textures.Asteroid1;
+                    }
+                    else if (randInt == 2)
+                    {
+                        pos.X = 250;
+                        texture = Textures.Asteroid2;
+                    }
+                    else
+                    {
+                        pos.X = 350;
+                        texture = Textures.Asteroid3;
+                    }
+
+                    o = new RoundObject(1, ObjectID.Asteroid, 0, 1, 25, texture)
+                    {
+                        Position = pos,
+                        Velocity = MainGame.BackgroundObjectVelocity
+                    };
+                    break;
+
+                case ObjectID.SmallAsteroid:
+                    randInt = random.Next(1, 2);
+                    pos = new Vector2(150, -30);
+
+                    if (randInt == 1)
+                    {
+                        pos.X = 200;
+                        texture = Textures.Asteroid4;
+                    }
+                    else
+                    {
+                        pos.X = 400;
+                        texture = Textures.Asteroid5;
+                    }
+
+                    o = new RoundObject(1, ObjectID.SmallAsteroid, 0, 1, 20, texture)
+                    {
+                        Position = pos,
+                        Velocity = MainGame.BackgroundObjectVelocity
+                    };
+                    break;
+
+                case ObjectID.Debris:
+                    break;
+
+                case ObjectID.Satellite:
+                    break;
+
+                case ObjectID.Turret:
+                    break;
+
+                case ObjectID.RingWhite:
+                    break;
+
+                case ObjectID.RingYellow:
+                    break;
+
+                case ObjectID.RingGreen:
+                    break;
+
+                case ObjectID.RingRed:
+                    break;
 
                 default:
-                    // TEMP create asteroid
-                    o = new RoundObject(1, ObjectID.Asteroid, 0, 1, 25, Textures.Asteroid1);
-                    o.Position = new Vector2(250, -30);
-                    o.Velocity = MainGame.BackgroundObjectVelocity;
+                    Debug.WriteLine("Error: tried to create object " + id);
                     break;
             }
 
             return o;
         }
+    }
+
+    public enum LevelState
+    {
+        BeforeStart,
+        Main,
+        DoneSpawning,
+        BossStartText,
+        BossFight,
+        BossEndText,
+        Win,
+        Loss
     }
 }

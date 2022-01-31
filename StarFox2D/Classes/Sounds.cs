@@ -16,7 +16,7 @@ namespace StarFox2D.Classes
 
         public static float SoundEffectVolume = 1f;
 
-        public static float MusicVolume = 0.25f;  // temp set to 0.25
+        public static float MusicVolume = 0f;  // temp, set to 1 after
 
 
 
