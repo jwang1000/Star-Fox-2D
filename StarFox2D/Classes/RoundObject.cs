@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace StarFox2D.Classes
@@ -30,7 +31,25 @@ namespace StarFox2D.Classes
 
         public override bool CheckBulletCollision(Bullet bullet)
         {
-            throw new NotImplementedException();
+            if (bullet.Position.X + bullet.Radius >= Position.X - Radius &&
+                bullet.Position.X - bullet.Radius <= Position.X + Radius &&
+                bullet.Position.Y + bullet.Radius >= Position.Y - Radius &&
+                bullet.Position.Y - bullet.Radius <= Position.Y + Radius)
+            {
+                bullet.IsAlive = false;
+                Health -= bullet.Damage;
+                Debug.WriteLine("health is now " + Health + " after taking " + bullet.Damage + " damage");
+                if (Health <= 0)
+                {
+                    Death();
+                }
+                else if (bullet.BulletEffects.Count > 0)
+                {
+                    // TODO apply statuses once implemented
+                }
+                return true;
+            }
+            return false;
         }
 
         public override bool ObjectIsOutsideScreen()
@@ -38,11 +57,6 @@ namespace StarFox2D.Classes
             return Position.Y + Radius >= MainGame.ScreenHeight + MainGame.DespawnBuffer ||
                 Position.X - Radius <= -MainGame.DespawnBuffer ||
                 Position.X + Radius >= MainGame.ScreenWidth + MainGame.DespawnBuffer;
-        }
-
-        protected override bool OtherObjectIsWithinBoundaries(Object other)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -34,12 +34,5 @@ namespace StarFox2D.Classes
             // nothing happens for bullets colliding with bullets
             return false;
         }
-
-        protected override bool OtherObjectIsWithinBoundaries(Object other)
-        {
-            // method should never be called for a bullet, only for buildings, players, enemies, bosses
-            Debug.WriteLine("ERROR: Bullet class IsWithinBoundaries was called with argument " + other.ID);
-            return false;
-        }
     }
 }

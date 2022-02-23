@@ -130,13 +130,6 @@ namespace StarFox2D.Classes
         public abstract bool ObjectIsOutsideScreen();
 
         /// <summary>
-        /// Given the other object, checks if the hitboxes are overlapping.
-        /// The entire Object needs to be passed in for the Visitor design pattern.
-        /// TODO is this necessary for the base class? Maybe only need to include in Player class.
-        /// </summary>
-        protected abstract bool OtherObjectIsWithinBoundaries(Object other);
-
-        /// <summary>
         /// Adds the object's score to the score of the game level.
         /// Destruction of the objects is handled in MainGame.Update as one or both objects may be destroyed.
         /// </summary>

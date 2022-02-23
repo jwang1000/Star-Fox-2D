@@ -28,25 +28,36 @@ namespace StarFox2D.Classes
             // TODO draw shield and effects
         }
 
-        public override bool CheckBulletCollision(Bullet bullet)
-        {
-            throw new NotImplementedException();
-        }
-
         public override bool ObjectIsOutsideScreen()
         {
             // Player will never be outside the screen
             return false;
         }
 
-        protected override bool OtherObjectIsWithinBoundaries(Object other)
+        /// <summary>
+        /// Given the other object, checks if the hitboxes are overlapping and applies damage if needed. Should be called in MainGame.Update.
+        /// </summary>
+        public void CheckOtherObjectIsWithinBoundaries(Object other)
         {
-            throw new NotImplementedException();
+            bool inBoundaries = false;
+            if (other is RoundObject)
+            {
+
+            }
+            else if (other is SquareObject)
+            {
+
+            }
+
+            if (inBoundaries)
+            {
+                // TODO apply damage per update
+            }
         }
 
         protected override void Death()
         {
-            throw new NotImplementedException();
+            MainGame.CurrentLevel.PlayerDeath();
         }
     }
 }

@@ -146,11 +146,12 @@ namespace StarFox2D.Classes
             Random random = new Random();
             int randInt;
             Vector2 pos;
+            Vector2 vel;
             Texture2D texture;
             switch (id)
             {
                 case ObjectID.Fly:
-                    o = new RoundEnemy(2, id, 1, 5, 20, Textures.Fly)
+                    o = new RoundEnemy(5, id, 1, 2, 20, Textures.Fly)
                     {
                         Position = new Vector2(250, -10),
                         Velocity = new Vector2(50, 400)
@@ -218,6 +219,31 @@ namespace StarFox2D.Classes
                     break;
 
                 case ObjectID.Debris:
+                    // debris move in random directions
+                    randInt = random.Next(1, 3);
+                    pos = new Vector2(150, -30);
+                    vel = new Vector2((float)random.Next(0, 100) / 100, (float)random.Next(50, 70) / 10);
+
+                    if (randInt == 1)
+                    {
+                        texture = Textures.Debris1;
+                    }
+                    else if (randInt == 2)
+                    {
+                        pos.X = 300;
+                        texture = Textures.Debris2;
+                    }
+                    else
+                    {
+                        pos.X = 425;
+                        texture = Textures.Debris3;
+                    }
+
+                    o = new RoundObject(1, ObjectID.Debris, 0, 1, 20, texture)
+                    {
+                        Position = pos,
+                        Velocity = vel
+                    };
                     break;
 
                 case ObjectID.Satellite:
@@ -244,6 +270,15 @@ namespace StarFox2D.Classes
             }
 
             return o;
+        }
+
+        /// <summary>
+        /// Should only be called by the Player class.
+        /// </summary>
+        public void PlayerDeath()
+        {
+            State = LevelState.Loss;
+            // TODO clear all object lists
         }
     }
 

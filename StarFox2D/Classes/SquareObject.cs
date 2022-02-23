@@ -39,10 +39,5 @@ namespace StarFox2D.Classes
                 Position.X - (SideLength / 2) <= -MainGame.DespawnBuffer ||
                 Position.X + (SideLength / 2) >= MainGame.ScreenWidth + MainGame.DespawnBuffer;
         }
-
-        protected override bool OtherObjectIsWithinBoundaries(Object other)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

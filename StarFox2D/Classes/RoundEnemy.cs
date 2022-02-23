@@ -25,20 +25,5 @@ namespace StarFox2D.Classes
 
             // TODO draw shield and effects
         }
-
-        public override bool CheckBulletCollision(Bullet bullet)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override bool OtherObjectIsWithinBoundaries(Object other)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void Death()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -74,6 +74,8 @@ namespace StarFox2D
 
         private Vector2 playerVelocity;
 
+        private readonly float healthBarWidth = 150f;
+
         /// <summary>
         /// The minimum y-value that the player can reach during a boss fight. (all range mode)
         /// </summary>
@@ -378,6 +380,25 @@ namespace StarFox2D
 
                 // update background
                 backgroundImagePosition.Y = (backgroundImagePosition.Y + 5) % (Textures.Background.Height / 2);
+
+                // draw health bar
+                spriteBatch.DrawString(TextBox.FontSmall, "Shield", new Vector2(ScreenWidth - 75, 30), Color.White);
+                Color healthColour;
+                if (Player.Health >= Player.MaxHealth / 2)
+                    healthColour = Color.Lerp(Color.Yellow, Color.Green, (Player.MaxHealth / 2 - (Player.MaxHealth - Player.Health))/((float)Player.MaxHealth / 2));
+                else
+                    healthColour = Color.Lerp(Color.Red, Color.Yellow, Player.Health / ((float)Player.MaxHealth / 2));
+                spriteBatch.Draw(Textures.Button, new Vector2(ScreenWidth - 95, 65), null, Color.Gray, 0, 
+                    new Vector2(Textures.Button.Width / 2, Textures.Button.Height / 2), 
+                    new Vector2(healthBarWidth / Textures.Button.Width, 15f / Textures.Button.Height), 
+                    SpriteEffects.None, 0f);
+                spriteBatch.Draw(Textures.Button, new Vector2(ScreenWidth - 95 - healthBarWidth * (Player.MaxHealth - Player.Health) / Player.MaxHealth / 2, 65), null, healthColour, 0, 
+                    new Vector2(Textures.Button.Width / 2, Textures.Button.Height / 2), 
+                    new Vector2(Player.Health * healthBarWidth / Player.MaxHealth / Textures.Button.Width, 15f / Textures.Button.Height), 
+                    SpriteEffects.None, 0f);
+
+                // draw score
+                spriteBatch.DrawString(TextBox.FontSmall, "Score: " + CurrentScore, new Vector2(20, 30), Color.White);
             }
             else
             {
@@ -729,14 +750,24 @@ namespace StarFox2D
         }
 
         /// <summary>
+        /// Should only be called by the Level class AFTER the "game over" text.
+        /// </summary>
+        private void EndLevel()
+        {
+            // TODO remaining actions for ending the level and returning to the level select menu
+
+            playingLevel = false;
+        }
+
+        /// <summary>
         /// Called once when the left mouse button is clicked.
         /// </summary>
         private void MouseLeftClicked()
         {
             if (playingLevel)
             {
-                // fire player bullets here TODO
-                Bullet b = new Bullet(1, ObjectID.PlayerBullet, 10, 0, 3, Textures.FilledCircle)
+                // fires player bullets here
+                Bullet b = new Bullet(1, ObjectID.PlayerBullet, Player.Damage, 0, 3, Textures.FilledCircle)
                 {
                     Position = new Vector2(Player.Position.X, Player.Position.Y - Player.Radius)
                 };

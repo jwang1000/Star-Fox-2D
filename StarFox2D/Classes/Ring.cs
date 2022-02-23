@@ -41,10 +41,5 @@ namespace StarFox2D.Classes
             // nothing should happen for rings
             return false;
         }
-
-        protected override bool OtherObjectIsWithinBoundaries(Object other)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
