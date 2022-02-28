@@ -70,7 +70,7 @@ namespace StarFox2D.Classes
         private static ObjectSpawn[] corneriaObjectSpawns =
         {
             new ObjectSpawn(ObjectID.Fly, 60),
-            new ObjectSpawn(ObjectID.Fly, 300),
+            /*new ObjectSpawn(ObjectID.Fly, 300),
             new ObjectSpawn(ObjectID.Fly, 300),
             new ObjectSpawn(ObjectID.Fly, 280),
             new ObjectSpawn(ObjectID.Fly, 280),
@@ -81,15 +81,11 @@ namespace StarFox2D.Classes
             new ObjectSpawn(ObjectID.Fly, 200),
             new ObjectSpawn(ObjectID.Fly, 200),
             new ObjectSpawn(ObjectID.Fly, 180),
-            new ObjectSpawn(ObjectID.Fly, 60)
+            new ObjectSpawn(ObjectID.Fly, 60)*/
         };
         private static ObjectID[] corneriaBossSpawns = { ObjectID.Granga };
-        private static ScreenText[] corneriaStartText = { new ScreenText("Star Fox! Andross sent me to stop you!", new Vector2(35, 380)) };
-        private static ScreenText[] corneriaEndText = 
-        { 
-            new ScreenText("Once Andross hears about this, you're", new Vector2(40, 370)),
-            new ScreenText("through, you hear me? Through!", new Vector2(70, 400))
-        };
+        private static string corneriaStartText = "Star Fox! Andross sent me to stop you!";
+        private static string corneriaEndText = "Once Andross hears about this, you're through, you hear me? Through!";
         public static readonly FullLevelDetails Corneria = new FullLevelDetails(Sounds.Corneria, corneriaObjectSpawns, corneriaBossSpawns, corneriaStartText, corneriaEndText);
 
 
@@ -129,11 +125,11 @@ namespace StarFox2D.Classes
 
         public ObjectID[] BossesToSpawn;
 
-        public ScreenText[] BossStartText;
+        public string BossStartText;
 
-        public ScreenText[] BossEndText;
+        public string BossEndText;
 
-        public FullLevelDetails(MusicIntroLoop music, ObjectSpawn[] objectsToSpawn, ObjectID[] bossesToSpawn, ScreenText[] bossStartText, ScreenText[] bossEndText)
+        public FullLevelDetails(MusicIntroLoop music, ObjectSpawn[] objectsToSpawn, ObjectID[] bossesToSpawn, string bossStartText, string bossEndText)
         {
             Music = music;
             SpawnIndex = 0;
@@ -163,18 +159,6 @@ namespace StarFox2D.Classes
             TimeSinceLastSpawn = timeSinceLastSpawn;
             LeftX = leftX;
             RightX = rightX;
-        }
-    }
-
-    public struct ScreenText
-    {
-        public string Line;
-        public Vector2 TopLeft;
-
-        public ScreenText(string line, Vector2 topLeft)
-        {
-            Line = line;
-            TopLeft = topLeft;
         }
     }
 

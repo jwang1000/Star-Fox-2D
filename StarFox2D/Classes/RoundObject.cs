@@ -17,7 +17,7 @@ namespace StarFox2D.Classes
             Radius = radius;
         }
 
-        public override void Update(TimeSpan levelTime)
+        public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
             // Regular round objects (non-enemies) shouldn't do anything
         }
@@ -26,7 +26,10 @@ namespace StarFox2D.Classes
         {
             spriteBatch.Draw(Texture, Position, null, Color.White, TextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / Texture.Width), SpriteEffects.None, 0f);
 
-            // TODO draw effects
+            if (this is RoundEnemy)
+            {
+                // TODO draw effects
+            }
         }
 
         public override bool CheckBulletCollision(Bullet bullet)
@@ -37,16 +40,7 @@ namespace StarFox2D.Classes
                 bullet.Position.Y - bullet.Radius <= Position.Y + Radius)
             {
                 bullet.IsAlive = false;
-                Health -= bullet.Damage;
-                Debug.WriteLine("health is now " + Health + " after taking " + bullet.Damage + " damage");
-                if (Health <= 0)
-                {
-                    Death();
-                }
-                else if (bullet.BulletEffects.Count > 0)
-                {
-                    // TODO apply statuses once implemented
-                }
+                TakeDamage(bullet.Damage, bullet.BulletEffects);
                 return true;
             }
             return false;

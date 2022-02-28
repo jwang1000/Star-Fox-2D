@@ -41,6 +41,10 @@ namespace StarFox2D.Classes
 
         public MusicIntroLoop LevelMusic { get; private set; }
 
+        public string BossStartText { get; private set; }
+
+        public string BossEndText { get; private set; }
+
         private FullLevelDetails levelDetails;
 
         private TimeSpan lastSpawnedObjectTime;
@@ -64,6 +68,8 @@ namespace StarFox2D.Classes
             TimeBeforeBossText = new TimeSpan(0, 0, timeBeforeBossTextSeconds);
             BossStartTextTime = new TimeSpan(0, 0, bossStartTextSeconds);
             BossEndTextTime = new TimeSpan(0, 0, bossEndTextSeconds);
+            BossStartText = levelDetails.BossStartText;
+            BossEndText = levelDetails.BossEndText;
             State = LevelState.BeforeStart;
             lastSpawnedObjectTime = TimeBeforeLevelStart;
         }

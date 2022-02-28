@@ -76,6 +76,12 @@ namespace StarFox2D
 
         private readonly float healthBarWidth = 150f;
 
+        private readonly string beforeStartText = "Good Luck!";
+
+        private readonly string transmissionText = "INCOMING TRANSMISSION";
+
+        private readonly string allRangeText = "ALL-RANGE MODE ACTIVE";
+
         /// <summary>
         /// The minimum y-value that the player can reach during a boss fight. (all range mode)
         /// </summary>
@@ -116,7 +122,11 @@ namespace StarFox2D
         /// <summary>
         /// All text that is on screen (which are not part of any other component, i.e. buttons).
         /// </summary>
-        private List<TextBox> text;
+        private List<TextBox> menuText;
+
+        private TextBox bossStartText;
+
+        private TextBox bossEndText;
 
         private MouseState mouseState;
         private MouseState lastMouseState;
@@ -148,7 +158,7 @@ namespace StarFox2D
 
             buttons = new List<Button>();
             settingsSliders = new List<Slider>();
-            text = new List<TextBox>();
+            menuText = new List<TextBox>();
             loadingText = "Loading";
         }
 
@@ -265,19 +275,19 @@ namespace StarFox2D
 
                 // call update methods simultaneously for all objects for additional logic
                 Player.Position += playerVelocity * elapsedSeconds;
-                Player.Update(CurrentTime);
+                Player.Update(gameTime, CurrentTime);
 
                 for (int i = Objects.Count - 1; i >= 0; --i)
                 {
                     var obj = Objects[i];
                     obj.Position += obj.Velocity * elapsedSeconds;
-                    obj.Update(CurrentTime);
+                    obj.Update(gameTime, CurrentTime);
                 }
                 for (int i = Bullets.Count - 1; i >= 0; --i)
                 {
                     var bullet = Bullets[i];
                     bullet.Position += bullet.Velocity * elapsedSeconds;
-                    bullet.Update(CurrentTime);
+                    bullet.Update(gameTime, CurrentTime);
 
                     if (bullet.ID == ObjectID.EnemyBullet)
                     {
@@ -327,14 +337,6 @@ namespace StarFox2D
                 }
             }
 
-            // TEMP TESTING
-            /*
-            if (gameTime.TotalGameTime > TimeSpan.FromSeconds(1) && !playingLevel)
-            {
-                StartLevel(LevelID.Corneria);
-                text = new List<TextBox>();
-            }*/
-
             base.Update(gameTime);
         }
 
@@ -365,14 +367,15 @@ namespace StarFox2D
             {
                 b.Draw(spriteBatch, mouseState.Position.ToVector2());
             }
-            foreach (TextBox t in text)
+            foreach (TextBox t in menuText)
             {
                 t.Draw(spriteBatch);
             }
 
             if (playingLevel)
             {
-                Player.Draw(spriteBatch);
+                if (Player.IsAlive)
+                    Player.Draw(spriteBatch);
                 foreach (var obj in Objects)
                     obj.Draw(spriteBatch);
                 foreach (var bullet in Bullets)
@@ -388,6 +391,8 @@ namespace StarFox2D
                     healthColour = Color.Lerp(Color.Yellow, Color.Green, (Player.MaxHealth / 2 - (Player.MaxHealth - Player.Health))/((float)Player.MaxHealth / 2));
                 else
                     healthColour = Color.Lerp(Color.Red, Color.Yellow, Player.Health / ((float)Player.MaxHealth / 2));
+
+                // background of health bar, then current health portion
                 spriteBatch.Draw(Textures.Button, new Vector2(ScreenWidth - 95, 65), null, Color.Gray, 0, 
                     new Vector2(Textures.Button.Width / 2, Textures.Button.Height / 2), 
                     new Vector2(healthBarWidth / Textures.Button.Width, 15f / Textures.Button.Height), 
@@ -399,6 +404,49 @@ namespace StarFox2D
 
                 // draw score
                 spriteBatch.DrawString(TextBox.FontSmall, "Score: " + CurrentScore, new Vector2(20, 30), Color.White);
+
+                switch (CurrentLevel.State)
+                {
+                    case LevelState.BeforeStart:
+                        spriteBatch.DrawString(TextBox.FontLarge, beforeStartText, 
+                            new Vector2(ScreenWidth / 2 - TextBox.FontLarge.MeasureString(beforeStartText).X / 2, ScreenHeight / 2 - TextBox.FontLarge.MeasureString(beforeStartText).Y / 2), 
+                            Color.White);
+                        break;
+
+                    case LevelState.BossStartText:
+                        // draw boss start text, "incoming transmission"
+                        spriteBatch.DrawString(TextBox.FontRegular, transmissionText,
+                            new Vector2(ScreenWidth / 2 - TextBox.FontRegular.MeasureString(transmissionText).X / 2, 150),
+                            Color.White);
+                        bossStartText.Draw(spriteBatch);
+                        break;
+
+                    case LevelState.BossFight:
+                        // draw boss health
+                        break;
+
+                    case LevelState.BossEndText:
+                        // draw boss end text, "incoming transmission"
+                        spriteBatch.DrawString(TextBox.FontRegular, transmissionText,
+                            new Vector2(ScreenWidth / 2 - TextBox.FontRegular.MeasureString(transmissionText).X / 2, 150),
+                            Color.White);
+                        bossEndText.Draw(spriteBatch);
+                        break;
+
+                    case LevelState.Win:
+                        break;
+
+                    case LevelState.Loss:
+                        break;
+                }
+
+                if (CurrentLevel.State >= LevelState.BossStartText)
+                {
+                    // draw all range text
+                    spriteBatch.DrawString(TextBox.FontSmall, allRangeText,
+                        new Vector2(ScreenWidth / 2 - TextBox.FontSmall.MeasureString(allRangeText).X / 2, ScreenHeight - 25 - TextBox.FontSmall.MeasureString(allRangeText).Y / 2),
+                        Color.White);
+                }
             }
             else
             {
@@ -433,7 +481,6 @@ namespace StarFox2D
             TextBox.FontLarge = Content.Load<SpriteFont>("FontLarge");
             TextBox.FontTitle = Content.Load<SpriteFont>("FontTitle");
         }
-
 
         private void LoadTextures(object state)
         {
@@ -581,7 +628,7 @@ namespace StarFox2D
         /// </summary>
         private void ChangeMenu(MenuPages page)
         {
-            text.Clear();
+            menuText.Clear();
             buttons.Clear();
             Button.ClickAction backButtonAction = () => ChangeMenu(MenuPages.TitleScreen);
             Vector2 backButtonPosition = new Vector2(375, 700);
@@ -589,7 +636,7 @@ namespace StarFox2D
             switch (page)
             {
                 case MenuPages.TitleScreen:
-                    text.Add(new TextBox("STAR FOX 2D", new Vector2(70, 50), FontSize.Title));
+                    menuText.Add(new TextBox("STAR FOX 2D", new Vector2(70, 50), FontSize.Title));
 
                     buttons.Add(new Button(new Vector2(250, 400), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.LevelSelect), Textures.Button, text: "Level Select"));
                     buttons.Add(new Button(new Vector2(250, 490), 200, 50, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.Settings), Textures.Button, text: "Settings"));
@@ -602,12 +649,12 @@ namespace StarFox2D
 
 
                 case MenuPages.Settings:
-                    text.Add(new TextBox("Settings", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+                    menuText.Add(new TextBox("Settings", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
-                    text.Add(new TextBox("Sound Effects Volume", new Vector2(25, 130), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    text.Add(new TextBox("Music Volume", new Vector2(25, 260), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    text.Add(new TextBox("Control Scheme", new Vector2(25, 390), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
-                    text.Add(ControlSchemeDescription);
+                    menuText.Add(new TextBox("Sound Effects Volume", new Vector2(25, 130), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    menuText.Add(new TextBox("Music Volume", new Vector2(25, 260), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    menuText.Add(new TextBox("Control Scheme", new Vector2(25, 390), new Vector2(ScreenWidth - 50, 100), FontSize.Medium));
+                    menuText.Add(ControlSchemeDescription);
 
                     buttons.Add(WASDControlScheme);
                     buttons.Add(ArrowKeysControlScheme);
@@ -619,7 +666,7 @@ namespace StarFox2D
 
 
                 case MenuPages.Help:
-                    text.Add(new TextBox("Help", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+                    menuText.Add(new TextBox("Help", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
                     string controlType;
                     string rollKey;
@@ -633,87 +680,87 @@ namespace StarFox2D
                         controlType = "the arrow keys";
                         rollKey = "RCTRL";
                     }
-                    text.Add(new TextBox("Use " + controlType + " to control the Arwing! Click anywhere on screen to shoot lasers. Destroy enemies and obstacles to get points.",
+                    menuText.Add(new TextBox("Use " + controlType + " to control the Arwing! Click anywhere on screen to shoot lasers. Destroy enemies and obstacles to get points.",
                         new Vector2(25, 110), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("Running into enemies, obstacles, or their bullets will deplete your shield health. If your shield drops to 0, it's game over!",
+                    menuText.Add(new TextBox("Running into enemies, obstacles, or their bullets will deplete your shield health. If your shield drops to 0, it's game over!",
                         new Vector2(25, 200), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("Press " + rollKey + " to do a barrel roll, which makes you invincible for a short time. You can't shoot while you're rolling though, and you'll need to wait before you can roll again.",
+                    menuText.Add(new TextBox("Press " + rollKey + " to do a barrel roll, which makes you invincible for a short time. You can't shoot while you're rolling though, and you'll need to wait before you can roll again.",
                         new Vector2(25, 290), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("If you see any rings, you should run into them. They will give you points and restore your shield, and some can have other effects. Find out what they are!",
+                    menuText.Add(new TextBox("If you see any rings, you should run into them. They will give you points and restore your shield, and some can have other effects. Find out what they are!",
                         new Vector2(25, 405), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("There is a boss battle at the end of each level. While in this battle, the Arwing enters All-Range mode, meaning that you can move freely around the screen. " +
+                    menuText.Add(new TextBox("There is a boss battle at the end of each level. While in this battle, the Arwing enters All-Range mode, meaning that you can move freely around the screen. " +
                         "However, while not in All-Range Mode, you can only move left and right.",
                         new Vector2(25, 520), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("Make sure to read the background story if you're not familiar with Star Fox. It will clear some things up.",
+                    menuText.Add(new TextBox("Make sure to read the background story if you're not familiar with Star Fox. It will clear some things up.",
                         new Vector2(25, 730), new Vector2(ScreenWidth - 50, 100), FontSize.Small, true));
                     break;
 
 
                 case MenuPages.About:
-                    text.Add(new TextBox("About", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
+                    menuText.Add(new TextBox("About", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 100), FontSize.Large));
 
-                    text.Add(new TextBox("Written by Jonathan Wang, Jan. 1 - 2021. Original version written Mar. 9 - May 24, 2017.", 
+                    menuText.Add(new TextBox("Written by Jonathan Wang, Jan. 1 - 2021. Original version written Mar. 9 - May 24, 2017.", 
                         new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("Thanks to Ms. Stusiak, Richard Gan, and Andrew Luo for help with many various issues in the original!",
+                    menuText.Add(new TextBox("Thanks to Ms. Stusiak, Richard Gan, and Andrew Luo for help with many various issues in the original!",
                         new Vector2(25, 215), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("This game was (re)written as a technical exercise to learn Monogame. I do not own any of the images, characters, music, or any other IP that appears in this game. " +
+                    menuText.Add(new TextBox("This game was (re)written as a technical exercise to learn Monogame. I do not own any of the images, characters, music, or any other IP that appears in this game. " +
                         "All rights belong to their rightful owners, namely Nintendo.",
                         new Vector2(25, 310), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("There is no auto-click option in this game as it would make it too easy. Yes, I did extensive testing. Enjoy tendinitis. :)",
+                    menuText.Add(new TextBox("There is no auto-click option in this game as it would make it too easy. Yes, I did extensive testing. Enjoy tendinitis. :)",
                         new Vector2(25, 460), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
                     break;
 
 
                 case MenuPages.LevelSelect:
-                    text.Add(new TextBox("Level Select", new Vector2(25, 30), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+                    menuText.Add(new TextBox("Level Select", new Vector2(25, 30), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
                     buttons.Add(new Button(new Vector2(ScreenWidth / 2, 125), 300, 40, Color.Blue, Color.CornflowerBlue, () => ChangeMenu(MenuPages.BackgroundStory), Textures.Button, text: "Background Story"));
 
                     buttons.Add(new Button(new Vector2(150, 225), 75, 75, Color.Blue, Color.CornflowerBlue, () => StartLevel(LevelID.Corneria), Textures.Button, text: "1"));
-                    text.Add(new TextBox("Corneria", new Vector2(75, 260), new Vector2(150, 50), FontSize.Small));
+                    menuText.Add(new TextBox("Corneria", new Vector2(75, 260), new Vector2(150, 50), FontSize.Small));
 
                     Button level2 = new Button(new Vector2(ScreenWidth - 150, 225), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 2"), Textures.Button, text: "2")
                     {
                         IsActive = SaveData.LevelCompleted >= 1
                     };
                     buttons.Add(level2);
-                    text.Add(new TextBox("Asteroid", new Vector2(ScreenWidth - 225, 260), new Vector2(150, 50), FontSize.Small));
+                    menuText.Add(new TextBox("Asteroid", new Vector2(ScreenWidth - 225, 260), new Vector2(150, 50), FontSize.Small));
 
                     Button level3 = new Button(new Vector2(150, 400), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 3"), Textures.Button, text: "3")
                     {
                         IsActive = SaveData.LevelCompleted >= 2
                     };
                     buttons.Add(level3);
-                    text.Add(new TextBox("Space Armada", new Vector2(70, 435), new Vector2(150, 50), FontSize.Small));
+                    menuText.Add(new TextBox("Space Armada", new Vector2(70, 435), new Vector2(150, 50), FontSize.Small));
 
                     Button level4 = new Button(new Vector2(ScreenWidth - 150, 400), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 4"), Textures.Button, text: "4")
                     {
                         IsActive = SaveData.LevelCompleted >= 3
                     };
                     buttons.Add(level4);
-                    text.Add(new TextBox("Meteor", new Vector2(ScreenWidth - 225, 435), new Vector2(150, 50), FontSize.Small));
+                    menuText.Add(new TextBox("Meteor", new Vector2(ScreenWidth - 225, 435), new Vector2(150, 50), FontSize.Small));
 
                     Button level5 = new Button(new Vector2(ScreenWidth / 2, 575), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 5"), Textures.Button, text: "5")
                     {
                         IsActive = SaveData.LevelCompleted >= 4
                     };
                     buttons.Add(level5);
-                    text.Add(new TextBox("Venom", new Vector2(ScreenWidth / 2 - 75, 610), new Vector2(150, 50), FontSize.Small));
+                    menuText.Add(new TextBox("Venom", new Vector2(ScreenWidth / 2 - 75, 610), new Vector2(150, 50), FontSize.Small));
                     break;
 
 
                 case MenuPages.BackgroundStory:
-                    text.Add(new TextBox("Background Story", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
+                    menuText.Add(new TextBox("Background Story", new Vector2(25, 40), new Vector2(ScreenWidth - 50, 50), FontSize.Large));
 
-                    text.Add(new TextBox("The evil lord Andross is threatening the planet Corneria with total destruction. As the elite pilot Fox McCloud, you have been hired to stop him. Take the fight to his lair on the planet " +
+                    menuText.Add(new TextBox("The evil lord Andross is threatening the planet Corneria with total destruction. As the elite pilot Fox McCloud, you have been hired to stop him. Take the fight to his lair on the planet " +
                         "Venom and destroy Andross before it's too late.",
                         new Vector2(25, 150), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("You will meet servants of Andross and mercenaries hired by him along the way.",
+                    menuText.Add(new TextBox("You will meet servants of Andross and mercenaries hired by him along the way.",
                         new Vector2(25, 300), new Vector2(ScreenWidth - 50, 100), FontSize.Medium, true));
-                    text.Add(new TextBox("Good luck!",
+                    menuText.Add(new TextBox("Good luck!",
                         new Vector2(25, 375), new Vector2(ScreenWidth - 50, 100), FontSize.Regular));
 
-                    text.Add(new TextBox("\"I'll do my best. Andross won't have his way with me!\"",
+                    menuText.Add(new TextBox("\"I'll do my best. Andross won't have his way with me!\"",
                         new Vector2(ScreenWidth - 250, 500), new Vector2(200, 100), FontSize.Medium));
 
                     backButtonAction = () => ChangeMenu(MenuPages.LevelSelect);
@@ -721,7 +768,7 @@ namespace StarFox2D
             }
 
             if (page != MenuPages.BackgroundStory)
-                text.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
+                menuText.Add(new TextBox("Star Fox 2D v2.0", new Vector2(10, ScreenHeight - 25), FontSize.Small));
             buttons.Add(new Button(backButtonPosition, 150, 50, Color.Gray, Color.DarkGray, backButtonAction, Textures.Button, text: backButtonText));
 
             menuPage = page;
@@ -729,7 +776,7 @@ namespace StarFox2D
 
         private void StartLevel(LevelID level)
         {
-            text.Clear();
+            menuText.Clear();
             buttons.Clear();
             CurrentTime = TimeSpan.Zero;
             CurrentLevel = new Level(level);
@@ -745,6 +792,9 @@ namespace StarFox2D
 
             Objects = new List<Classes.Object>();
             Bullets = new List<Bullet>();
+
+            bossStartText = new TextBox(CurrentLevel.BossStartText, new Vector2(50, 175), new Vector2(ScreenWidth - 100, 300));
+            bossEndText = new TextBox(CurrentLevel.BossEndText, new Vector2(50, 175), new Vector2(ScreenWidth - 100, 300));
 
             playingLevel = true;
         }

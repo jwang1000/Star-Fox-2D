@@ -12,7 +12,7 @@ namespace StarFox2D.Classes
         public Bullet(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, Effects bulletEffects = null) 
             : base(health, id, damage, score, radius, texture, bulletEffects) { }
 
-        public override void Update(TimeSpan levelTime)
+        public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
             // update velocity of the bullet if it has the targeting effect
             if (BulletEffects.Count > 0 && BulletEffects.HasEffectApplied(EffectType.Target))

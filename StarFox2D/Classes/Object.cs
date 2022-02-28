@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace StarFox2D.Classes
 {
@@ -106,7 +107,7 @@ namespace StarFox2D.Classes
         /// All movement updating is done in the MainGame.Update method - do not implement in object Update methods.
         /// </summary>
         /// <param name="gameTime"></param>
-        public abstract void Update(TimeSpan levelTime);
+        public abstract void Update(GameTime gameTime, TimeSpan levelTime);
 
         /// <summary>
         /// Draws the texture. NOTE: the base Object.Draw implementation does not handled any colours or additional textures!
@@ -128,6 +129,24 @@ namespace StarFox2D.Classes
         /// Only needs to be implemented in RoundObject and SquareObject.
         /// </summary>
         public abstract bool ObjectIsOutsideScreen();
+
+        /// <summary>
+        /// Inflicts damage on the object and applies effects if appropriate. Calls Death() if necessary.
+        /// WARNING: Must be overridden to display the shield! Slowness will be applied here, but will not have an effect on non-enemies/players/bosses.
+        /// </summary>
+        public virtual void TakeDamage(int damage, Effects effects)
+        {
+            Health -= damage;
+            Debug.WriteLine("health is now " + Health + " after taking " + damage + " damage");
+            if (Health <= 0)
+            {
+                Death();
+            }
+            else if (effects.Count > 0)
+            {
+                // TODO apply statuses once implemented
+            }
+        }
 
         /// <summary>
         /// Adds the object's score to the score of the game level.

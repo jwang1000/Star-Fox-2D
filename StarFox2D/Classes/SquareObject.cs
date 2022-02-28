@@ -16,7 +16,7 @@ namespace StarFox2D.Classes
             SideLength = sideLength;
         }
 
-        public override void Update(TimeSpan levelTime)
+        public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
             // Regular square objects (non-enemies) shouldn't do anything
         }

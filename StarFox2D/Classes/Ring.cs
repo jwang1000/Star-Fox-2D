@@ -25,7 +25,7 @@ namespace StarFox2D.Classes
             ShieldIncrease = shieldIncrease;
         }
 
-        public override void Update(TimeSpan levelTime)
+        public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
             // rings should not need to update
             return;
