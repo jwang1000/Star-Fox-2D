@@ -134,7 +134,7 @@ namespace StarFox2D.Classes
         /// Inflicts damage on the object and applies effects if appropriate. Calls Death() if necessary.
         /// WARNING: Must be overridden to display the shield! Slowness will be applied here, but will not have an effect on non-enemies/players/bosses.
         /// </summary>
-        public virtual void TakeDamage(int damage, Effects effects)
+        public virtual void TakeDamage(int damage, Effects effects = null)
         {
             Health -= damage;
             Debug.WriteLine("health is now " + Health + " after taking " + damage + " damage");
@@ -142,7 +142,7 @@ namespace StarFox2D.Classes
             {
                 Death();
             }
-            else if (effects.Count > 0)
+            else if (effects != null && effects.Count > 0)
             {
                 // TODO apply statuses once implemented
             }
@@ -156,6 +156,14 @@ namespace StarFox2D.Classes
         {
             MainGame.CurrentScore += Score;
             IsAlive = false;
+        }
+
+        /// <summary>
+        /// Given the centres of two <b>round</b> objects, calculates the distance between them.
+        /// </summary>
+        public static float CalculateRoundObjectDistance(Vector2 pos1, Vector2 pos2)
+        {
+            return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2));
         }
     }
 

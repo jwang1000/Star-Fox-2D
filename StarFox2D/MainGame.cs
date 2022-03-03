@@ -132,7 +132,14 @@ namespace StarFox2D
         private MouseState lastMouseState;
 
         private string loadingText;
+
         private ControlScheme controlScheme;
+        private Keys moveUp;
+        private Keys moveLeft;
+        private Keys moveDown;
+        private Keys moveRight;
+        private Keys roll;
+
         private Button WASDControlScheme;
         private Button ArrowKeysControlScheme;
         private Color WASDControlSchemeButtonColour;
@@ -204,7 +211,7 @@ namespace StarFox2D
                 playerBossBorder = ScreenHeight / 2;
                 lastMouseState = Mouse.GetState();
 
-                StartMusic();
+                StartMenuMusic();
 
                 allMediaLoaded = true;
             }
@@ -250,9 +257,9 @@ namespace StarFox2D
 
                 if (CurrentLevel.State >= LevelState.BossStartText)
                 {
-                    if (kstate.IsKeyDown(Keys.W))
+                    if (kstate.IsKeyDown(moveUp))
                         playerVelocity.Y -= Player.BaseVelocity;
-                    if (kstate.IsKeyDown(Keys.S))
+                    if (kstate.IsKeyDown(moveDown))
                         playerVelocity.Y += Player.BaseVelocity;
 
                     // constrain movement vertically
@@ -261,9 +268,9 @@ namespace StarFox2D
                     else if (Player.Position.Y >= ScreenHeight)
                         playerVelocity.Y = MathF.Min(0, playerVelocity.Y);
                 }
-                if (kstate.IsKeyDown(Keys.A))
+                if (kstate.IsKeyDown(moveLeft))
                     playerVelocity.X -= Player.BaseVelocity;
-                if (kstate.IsKeyDown(Keys.D))
+                if (kstate.IsKeyDown(moveRight))
                     playerVelocity.X += Player.BaseVelocity;
 
                 // constrain player movement horizontally
@@ -271,6 +278,11 @@ namespace StarFox2D
                     playerVelocity.X = MathF.Max(0, playerVelocity.X);
                 else if (Player.Position.X >= ScreenWidth)
                     playerVelocity.X = MathF.Min(0, playerVelocity.X);
+
+                if (kstate.IsKeyDown(roll))
+                {
+                    // TODO handle rolling, set countdown for invulnerability and cooldown until next roll
+                }
 
 
                 // call update methods simultaneously for all objects for additional logic
@@ -282,6 +294,14 @@ namespace StarFox2D
                     var obj = Objects[i];
                     obj.Position += obj.Velocity * elapsedSeconds;
                     obj.Update(gameTime, CurrentTime);
+
+                    // check for overlapping
+                    Player.CheckOtherObjectIsWithinBoundaries(obj);
+
+                    if (!obj.IsAlive)
+                    {
+                        Objects.Remove(obj);
+                    }
                 }
                 for (int i = Bullets.Count - 1; i >= 0; --i)
                 {
@@ -305,7 +325,7 @@ namespace StarFox2D
                                 if (!obj.IsAlive)
                                 {
                                     Objects.Remove(obj);
-                                    // TODO add special check for boss to trigger level progression
+                                    // boss fight is checked for and triggered in Level.Update()
                                 }
                                 break;
                             }
@@ -584,7 +604,7 @@ namespace StarFox2D
         /// <summary>
         /// Starts the main menu music. Only necessary for the beginning of the game.
         /// </summary>
-        private void StartMusic()
+        private void StartMenuMusic()
         {
             currentSong = Sounds.Menu;
             currentSong.Start();
@@ -804,7 +824,7 @@ namespace StarFox2D
         /// </summary>
         private void EndLevel()
         {
-            // TODO remaining actions for ending the level and returning to the level select menu
+            // TODO remaining actions for ending the level and returning to the level select menu (saving, updating high score, etc.)
 
             playingLevel = false;
         }
@@ -823,6 +843,7 @@ namespace StarFox2D
                 };
                 b.Velocity = CalculateBulletVelocity(b.Position, mouseState.Position.ToVector2(), baseBulletSpeed);
                 Bullets.Add(b);
+                // TODO play sound
             }
             else
             {
@@ -863,6 +884,7 @@ namespace StarFox2D
                         if (b.MouseHoversButton(mouseState.Position.ToVector2()))
                         {
                             b.Clicked();
+                            // TODO play sound
                         }
                     }
                 }
@@ -888,12 +910,22 @@ namespace StarFox2D
                 WASDControlSchemeButtonColour = Color.Blue;
                 ArrowKeysControlSchemeButtonColour = Color.Gray;
                 ControlSchemeDescription.SetText("WASD to move, spacebar to roll");
+                moveUp = Keys.W;
+                moveLeft = Keys.A;
+                moveDown = Keys.S;
+                moveRight = Keys.D;
+                roll = Keys.Space;
             }
             else
             {
                 WASDControlSchemeButtonColour = Color.Gray;
                 ArrowKeysControlSchemeButtonColour = Color.Blue;
                 ControlSchemeDescription.SetText("Arrow keys to move, RCTRL to roll");
+                moveUp = Keys.Up;
+                moveLeft = Keys.Left;
+                moveDown = Keys.Down;
+                moveRight = Keys.Right;
+                roll = Keys.RightControl;
             }
             WASDControlScheme.Colour = WASDControlSchemeButtonColour;
             ArrowKeysControlScheme.Colour = ArrowKeysControlSchemeButtonColour;

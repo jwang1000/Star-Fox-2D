@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace StarFox2D.Classes
@@ -10,6 +11,10 @@ namespace StarFox2D.Classes
     {
         public float BaseVelocity { get; private set; }
 
+        private bool overlappingOtherObj;
+        private TimeSpan lastOverlapDamageTime;
+        private TimeSpan minTimeBetweenOverlapDamage;
+        private Object otherObjBeingOverlapped;
         private Shield Shield;
 
         public Player(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, Effects bulletEffects = null)
@@ -17,11 +22,24 @@ namespace StarFox2D.Classes
         {
             BaseVelocity = 300;
             Shield = new Shield(Position, Radius);
+            overlappingOtherObj = false;
+            lastOverlapDamageTime = new TimeSpan();
+            minTimeBetweenOverlapDamage = new TimeSpan(0, 0, 0, 0, 10);
         }
 
         public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
-            // TODO
+            if (overlappingOtherObj)
+            {
+                if (levelTime - lastOverlapDamageTime > minTimeBetweenOverlapDamage)
+                {
+                    TakeDamage(1);
+                    lastOverlapDamageTime = levelTime;
+                    otherObjBeingOverlapped.TakeDamage(1);
+                }
+                overlappingOtherObj = false;
+            }
+
             Shield.Update(gameTime, Position);
         }
 
@@ -44,23 +62,27 @@ namespace StarFox2D.Classes
         /// </summary>
         public void CheckOtherObjectIsWithinBoundaries(Object other)
         {
-            bool inBoundaries = false;
-            if (other is RoundObject)
+            overlappingOtherObj = false;
+            if (other is RoundObject roundObj)
             {
-
+                overlappingOtherObj = CalculateRoundObjectDistance(Position, roundObj.Position) <= Radius + roundObj.Radius;
+                otherObjBeingOverlapped = other;
             }
-            else if (other is SquareObject)
+            else if (other is SquareObject squareObj)
             {
+                // find coordinate that is orthogonal to the direction the side points in (left wall is vertical, so find horizontal (x) coord)
+                float leftSideX = squareObj.Position.X - squareObj.SideLength / 2;
+                float bottomSideY = squareObj.Position.Y + squareObj.SideLength / 2;
+                float rightSideX = squareObj.Position.X + squareObj.SideLength / 2;
+                float topSideY = squareObj.Position.Y - squareObj.SideLength / 2;
 
-            }
-
-            if (inBoundaries)
-            {
-                // TODO apply damage per update
+                overlappingOtherObj = Position.X + Radius >= leftSideX && Position.X - Radius <= rightSideX
+                    && Position.Y - Radius <= bottomSideY && Position.Y + Radius >= topSideY;
+                otherObjBeingOverlapped = other;
             }
         }
 
-        public override void TakeDamage(int damage, Effects effects)
+        public override void TakeDamage(int damage, Effects effects = null)
         {
             base.TakeDamage(damage, effects);
             Shield.SetDamageTime();

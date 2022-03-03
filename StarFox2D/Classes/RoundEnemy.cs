@@ -32,7 +32,7 @@ namespace StarFox2D.Classes
             Shield.Draw(spriteBatch);
         }
 
-        public override void TakeDamage(int damage, Effects effects)
+        public override void TakeDamage(int damage, Effects effects = null)
         {
             base.TakeDamage(damage, effects);
             Shield.SetDamageTime();
