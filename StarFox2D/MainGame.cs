@@ -12,9 +12,10 @@ namespace StarFox2D
 {
     public class MainGame : Game
     {
+        #region Variables/Constants
+
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-
 
         public static Player Player;
 
@@ -146,6 +147,7 @@ namespace StarFox2D
         private Color ArrowKeysControlSchemeButtonColour;
         private TextBox ControlSchemeDescription;
 
+        #endregion
 
 
         public MainGame()
