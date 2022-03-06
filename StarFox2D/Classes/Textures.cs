@@ -40,7 +40,8 @@ namespace StarFox2D.Classes
         public static Texture2D Mosquito;
         public static Texture2D Queen;
 
-        public static Texture2D Ring;
+        public static Texture2D RingThin;
+        public static Texture2D RingThick;
 
         public static Texture2D Satellite1;
         public static Texture2D Satellite2;

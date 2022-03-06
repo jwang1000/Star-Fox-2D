@@ -20,9 +20,14 @@ namespace StarFox2D
         public static Player Player;
 
         /// <summary>
-        /// List of all Objects (enemies, bosses, buildings) in the level, EXCEPT bullets.
+        /// List of all Objects (enemies, buildings) in the level, EXCEPT bullets and bosses.
         /// </summary>
         public static List<Classes.Object> Objects;
+
+        /// <summary>
+        /// The boss for the level. Even if there are multiple bosses (Star Wolf, Andross), there should be one containing Boss object here.
+        /// </summary>
+        public static Classes.Object Boss;
 
         /// <summary>
         /// List of all bullets in the level, from players or enemies.
@@ -30,6 +35,8 @@ namespace StarFox2D
         public static List<Bullet> Bullets;
 
         public static Level CurrentLevel;
+
+        public static int PreviousHighScore;
 
         public static int CurrentScore;
 
@@ -75,13 +82,16 @@ namespace StarFox2D
 
         private Vector2 playerVelocity;
 
-        private readonly float healthBarWidth = 150f;
+        /// <summary>
+        /// For every one health, the health bar takes this many pixels.
+        /// </summary>
+        private readonly float healthBarPxPerHealth = 1.5f;
 
         private readonly string beforeStartText = "Good Luck!";
-
         private readonly string transmissionText = "INCOMING TRANSMISSION";
-
         private readonly string allRangeText = "ALL-RANGE MODE ACTIVE";
+        private readonly string victoryText = "You Win!";
+        private readonly string gameOverText = "Game Over...";
 
         /// <summary>
         /// The minimum y-value that the player can reach during a boss fight. (all range mode)
@@ -126,7 +136,6 @@ namespace StarFox2D
         private List<TextBox> menuText;
 
         private TextBox bossStartText;
-
         private TextBox bossEndText;
 
         private MouseState mouseState;
@@ -147,6 +156,10 @@ namespace StarFox2D
         private Color ArrowKeysControlSchemeButtonColour;
         private TextBox ControlSchemeDescription;
 
+        private string previousHighScoreText;
+        private string newHighScoreText;
+        private Button ExitLevel;
+
         #endregion
 
 
@@ -162,13 +175,14 @@ namespace StarFox2D
             secondTimer = 0;
 
             // set defaults, data is loaded later if it exists
-            SaveData.LevelCompleted = 0;
+            SaveData.LevelCompleted = -1;
             SaveData.HighScores = new int[5];
 
             buttons = new List<Button>();
             settingsSliders = new List<Slider>();
             menuText = new List<TextBox>();
             loadingText = "Loading";
+            newHighScoreText = "New High Score!";
         }
 
         protected override void Initialize()
@@ -248,7 +262,6 @@ namespace StarFox2D
                 // update level (spawns objects)
                 CurrentLevel.Update(CurrentTime);
 
-
                 // move all objects (players, enemies, etc)
                 // TODO movement multipliers from effects
                 kstate = Keyboard.GetState();
@@ -291,20 +304,30 @@ namespace StarFox2D
                 Player.Position += playerVelocity * elapsedSeconds;
                 Player.Update(gameTime, CurrentTime);
 
-                for (int i = Objects.Count - 1; i >= 0; --i)
+                if (CurrentLevel.State < LevelState.BossStartText)
                 {
-                    var obj = Objects[i];
-                    obj.Position += obj.Velocity * elapsedSeconds;
-                    obj.Update(gameTime, CurrentTime);
-
-                    // check for overlapping
-                    Player.CheckOtherObjectIsWithinBoundaries(obj);
-
-                    if (!obj.IsAlive)
+                    for (int i = Objects.Count - 1; i >= 0; --i)
                     {
-                        Objects.Remove(obj);
+                        var obj = Objects[i];
+                        obj.Position += obj.Velocity * elapsedSeconds;
+                        obj.Update(gameTime, CurrentTime);
+
+                        // check for overlapping
+                        Player.CheckOtherObjectIsWithinBoundaries(obj);
+
+                        if (!obj.IsAlive)
+                        {
+                            Objects.Remove(obj);
+                        }
                     }
                 }
+                else if (CurrentLevel.State == LevelState.BossFight)
+                {
+                    Boss.Position += Boss.Velocity * elapsedSeconds;
+                    Boss.Update(gameTime, CurrentTime);
+                    // levelState is updated in Level
+                }
+
                 for (int i = Bullets.Count - 1; i >= 0; --i)
                 {
                     var bullet = Bullets[i];
@@ -329,6 +352,15 @@ namespace StarFox2D
                                     Objects.Remove(obj);
                                     // boss fight is checked for and triggered in Level.Update()
                                 }
+                                break;
+                            }
+                        }
+                        if (CurrentLevel.State == LevelState.BossFight)
+                        {
+                            if (Boss.CheckBulletCollision(bullet))
+                            {
+                                Bullets.RemoveAt(i);
+                                // boss death is checked for in Level.Update()
                                 break;
                             }
                         }
@@ -384,7 +416,7 @@ namespace StarFox2D
             // Draw background
             spriteBatch.Draw(Textures.Background, backgroundImagePosition, null, Color.White, 0f, new Vector2(Textures.Background.Width/2, Textures.Background.Height/2), Vector2.One, SpriteEffects.None, 0f);
 
-            // All menu text and buttons are handled by the following:
+            // All menu text and buttons (but not text/buttons in levels) are handled by the following:
             foreach (Button b in buttons)
             {
                 b.Draw(spriteBatch, mouseState.Position.ToVector2());
@@ -407,7 +439,7 @@ namespace StarFox2D
                 backgroundImagePosition.Y = (backgroundImagePosition.Y + 5) % (Textures.Background.Height / 2);
 
                 // draw health bar
-                spriteBatch.DrawString(TextBox.FontSmall, "Shield", new Vector2(ScreenWidth - 75, 30), Color.White);
+                spriteBatch.DrawString(TextBox.FontSmall, "Shield", new Vector2(20, 30), Color.White);
                 Color healthColour;
                 if (Player.Health >= Player.MaxHealth / 2)
                     healthColour = Color.Lerp(Color.Yellow, Color.Green, (Player.MaxHealth / 2 - (Player.MaxHealth - Player.Health))/((float)Player.MaxHealth / 2));
@@ -415,18 +447,13 @@ namespace StarFox2D
                     healthColour = Color.Lerp(Color.Red, Color.Yellow, Player.Health / ((float)Player.MaxHealth / 2));
 
                 // background of health bar, then current health portion
-                spriteBatch.Draw(Textures.Button, new Vector2(ScreenWidth - 95, 65), null, Color.Gray, 0, 
-                    new Vector2(Textures.Button.Width / 2, Textures.Button.Height / 2), 
-                    new Vector2(healthBarWidth / Textures.Button.Width, 15f / Textures.Button.Height), 
-                    SpriteEffects.None, 0f);
-                spriteBatch.Draw(Textures.Button, new Vector2(ScreenWidth - 95 - healthBarWidth * (Player.MaxHealth - Player.Health) / Player.MaxHealth / 2, 65), null, healthColour, 0, 
-                    new Vector2(Textures.Button.Width / 2, Textures.Button.Height / 2), 
-                    new Vector2(Player.Health * healthBarWidth / Player.MaxHealth / Textures.Button.Width, 15f / Textures.Button.Height), 
-                    SpriteEffects.None, 0f);
+                spriteBatch.Draw(Textures.Button, new Rectangle(20, 60, (int)(healthBarPxPerHealth * Player.MaxHealth), 15), Color.Gray);
+                spriteBatch.Draw(Textures.Button, new Rectangle(20, 60, (int)(healthBarPxPerHealth * Player.Health), 15), healthColour);
 
                 // draw score
-                spriteBatch.DrawString(TextBox.FontSmall, "Score: " + CurrentScore, new Vector2(20, 30), Color.White);
+                spriteBatch.DrawString(TextBox.FontSmall, "Score: " + CurrentScore, new Vector2(ScreenWidth - 110, 30), Color.White);
 
+                // draw text/buttons in levels
                 switch (CurrentLevel.State)
                 {
                     case LevelState.BeforeStart:
@@ -444,7 +471,8 @@ namespace StarFox2D
                         break;
 
                     case LevelState.BossFight:
-                        // draw boss health
+                        // boss health bar is drawn by the boss itself
+                        Boss.Draw(spriteBatch);
                         break;
 
                     case LevelState.BossEndText:
@@ -456,9 +484,37 @@ namespace StarFox2D
                         break;
 
                     case LevelState.Win:
+                        // draw exit button, you win, previous/new high score
+                        spriteBatch.DrawString(TextBox.FontLarge, victoryText,
+                            new Vector2(ScreenWidth / 2 - TextBox.FontLarge.MeasureString(victoryText).X / 2, ScreenHeight / 2 - TextBox.FontLarge.MeasureString(victoryText).Y * 3 / 2),
+                            Color.White);
+                        spriteBatch.DrawString(TextBox.FontRegular, previousHighScoreText,
+                            new Vector2(ScreenWidth / 2 - TextBox.FontRegular.MeasureString(previousHighScoreText).X / 2, ScreenHeight / 2 - TextBox.FontRegular.MeasureString(previousHighScoreText).Y / 2),
+                            Color.White);
+                        if (CurrentScore > PreviousHighScore)
+                        {
+                            spriteBatch.DrawString(TextBox.FontRegular, newHighScoreText,
+                                new Vector2(ScreenWidth / 2 - TextBox.FontRegular.MeasureString(newHighScoreText).X / 2, ScreenHeight / 2 + TextBox.FontRegular.MeasureString(newHighScoreText).Y / 2),
+                                Color.White);
+                        }
+                        ExitLevel.Draw(spriteBatch, mouseState.Position.ToVector2());
                         break;
 
                     case LevelState.Loss:
+                        // draw exit button, game over, previous/new high score
+                        spriteBatch.DrawString(TextBox.FontLarge, gameOverText,
+                            new Vector2(ScreenWidth / 2 - TextBox.FontLarge.MeasureString(gameOverText).X / 2, ScreenHeight / 2 - TextBox.FontLarge.MeasureString(gameOverText).Y * 3 / 2),
+                            Color.White);
+                        spriteBatch.DrawString(TextBox.FontRegular, previousHighScoreText,
+                            new Vector2(ScreenWidth / 2 - TextBox.FontRegular.MeasureString(previousHighScoreText).X / 2, ScreenHeight / 2 - TextBox.FontRegular.MeasureString(previousHighScoreText).Y / 2),
+                            Color.White);
+                        if (CurrentScore > PreviousHighScore)
+                        {
+                            spriteBatch.DrawString(TextBox.FontRegular, newHighScoreText,
+                                new Vector2(ScreenWidth / 2 - TextBox.FontRegular.MeasureString(newHighScoreText).X / 2, ScreenHeight / 2 + TextBox.FontRegular.MeasureString(newHighScoreText).Y / 2),
+                                Color.White);
+                        }
+                        ExitLevel.Draw(spriteBatch, mouseState.Position.ToVector2());
                         break;
                 }
 
@@ -539,7 +595,8 @@ namespace StarFox2D
                 Textures.Mosquito = Content.Load<Texture2D>("mosquito");
                 Textures.Queen = Content.Load<Texture2D>("queen");
 
-                Textures.Ring = Content.Load<Texture2D>("Ring");
+                Textures.RingThin = Content.Load<Texture2D>("ring-thin");
+                Textures.RingThick = Content.Load<Texture2D>("ring-thick");
 
                 Textures.Satellite1 = Content.Load<Texture2D>("sat1");
                 Textures.Satellite2 = Content.Load<Texture2D>("sat2");
@@ -643,6 +700,8 @@ namespace StarFox2D
             WASDControlScheme = new Button(new Vector2(150, 500), 160, 50, WASDControlSchemeButtonColour, Color.CornflowerBlue, () => SetControlScheme(ControlScheme.WASD), Textures.Button, text: "WASD");
             ArrowKeysControlScheme = new Button(new Vector2(ScreenWidth - 150, 500), 160, 50, ArrowKeysControlSchemeButtonColour, Color.CornflowerBlue, () => SetControlScheme(ControlScheme.ArrowKeys), Textures.Button, text: "Arrow Keys");
             ControlSchemeDescription = new TextBox("", new Vector2(0, 525), new Vector2(ScreenWidth, 100), FontSize.Medium);
+
+            ExitLevel = new Button(new Vector2(375, 700), 150, 50, Color.Gray, Color.DarkGray, () => EndLevel(), Textures.Button, text: "Exit");
         }
 
         /// <summary>
@@ -743,28 +802,28 @@ namespace StarFox2D
 
                     Button level2 = new Button(new Vector2(ScreenWidth - 150, 225), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 2"), Textures.Button, text: "2")
                     {
-                        IsActive = SaveData.LevelCompleted >= 1
+                        IsActive = SaveData.LevelCompleted >= 0
                     };
                     buttons.Add(level2);
                     menuText.Add(new TextBox("Asteroid", new Vector2(ScreenWidth - 225, 260), new Vector2(150, 50), FontSize.Small));
 
                     Button level3 = new Button(new Vector2(150, 400), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 3"), Textures.Button, text: "3")
                     {
-                        IsActive = SaveData.LevelCompleted >= 2
+                        IsActive = SaveData.LevelCompleted >= 1
                     };
                     buttons.Add(level3);
                     menuText.Add(new TextBox("Space Armada", new Vector2(70, 435), new Vector2(150, 50), FontSize.Small));
 
                     Button level4 = new Button(new Vector2(ScreenWidth - 150, 400), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 4"), Textures.Button, text: "4")
                     {
-                        IsActive = SaveData.LevelCompleted >= 3
+                        IsActive = SaveData.LevelCompleted >= 2
                     };
                     buttons.Add(level4);
                     menuText.Add(new TextBox("Meteor", new Vector2(ScreenWidth - 225, 435), new Vector2(150, 50), FontSize.Small));
 
                     Button level5 = new Button(new Vector2(ScreenWidth / 2, 575), 75, 75, Color.Blue, Color.CornflowerBlue, () => Debug.WriteLine("Level 5"), Textures.Button, text: "5")
                     {
-                        IsActive = SaveData.LevelCompleted >= 4
+                        IsActive = SaveData.LevelCompleted >= 3
                     };
                     buttons.Add(level5);
                     menuText.Add(new TextBox("Venom", new Vector2(ScreenWidth / 2 - 75, 610), new Vector2(150, 50), FontSize.Small));
@@ -802,6 +861,7 @@ namespace StarFox2D
             buttons.Clear();
             CurrentTime = TimeSpan.Zero;
             CurrentLevel = new Level(level);
+            CurrentScore = 0;
             nextSong = CurrentLevel.LevelMusic;  // begins the transition process for music
 
             // initialize Player
@@ -814,21 +874,35 @@ namespace StarFox2D
 
             Objects = new List<Classes.Object>();
             Bullets = new List<Bullet>();
+            Boss = null;  // boss will be created in Level class
 
             bossStartText = new TextBox(CurrentLevel.BossStartText, new Vector2(50, 175), new Vector2(ScreenWidth - 100, 300));
             bossEndText = new TextBox(CurrentLevel.BossEndText, new Vector2(50, 175), new Vector2(ScreenWidth - 100, 300));
+            PreviousHighScore = SaveData.HighScores[(int)level];
+            previousHighScoreText = "Previous High Score: " + PreviousHighScore;
 
             playingLevel = true;
         }
 
         /// <summary>
-        /// Should only be called by the Level class AFTER the "game over" text.
+        /// Called by Level.Update() when Level state is set to Win OR Loss. Saves high scores and clears all objects.
         /// </summary>
+        public static void FinishLevel()
+        {
+            Objects.Clear();
+            Bullets.Clear();
+            Boss = null;
+            SaveData.SaveLevelData();  // high score, level completed is updated in SaveLevelData
+        }
+
         private void EndLevel()
         {
-            // TODO remaining actions for ending the level and returning to the level select menu (saving, updating high score, etc.)
-
+            Objects.Clear();
+            Bullets.Clear();
             playingLevel = false;
+            nextSong = Sounds.Menu;
+
+            ChangeMenu(MenuPages.LevelSelect);
         }
 
         /// <summary>
@@ -836,7 +910,7 @@ namespace StarFox2D
         /// </summary>
         private void MouseLeftClicked()
         {
-            if (playingLevel)
+            if (playingLevel && Player.IsAlive)
             {
                 // fires player bullets here
                 Bullet b = new Bullet(1, ObjectID.PlayerBullet, Player.Damage, 0, 3, Textures.FilledCircle)
@@ -896,6 +970,15 @@ namespace StarFox2D
                 }
             }
             Slider.ActiveSlider = null;
+
+            if (playingLevel && (CurrentLevel.State == LevelState.Loss || CurrentLevel.State == LevelState.Win))
+            {
+                if (ExitLevel.MouseHoversButton(mouseState.Position.ToVector2()))
+                {
+                    ExitLevel.Clicked();
+                    // TODO play sound
+                }
+            }
         }
 
         private void SetMusicVolume(float volume)

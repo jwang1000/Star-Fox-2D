@@ -38,6 +38,7 @@ namespace StarFox2D.Classes
                     otherObjBeingOverlapped.TakeDamage(1);
                 }
                 overlappingOtherObj = false;
+                otherObjBeingOverlapped = null;
             }
 
             Shield.Update(gameTime, Position);
@@ -45,7 +46,7 @@ namespace StarFox2D.Classes
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Texture, Position, null, Color.White, TextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / Texture.Width), SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, Position, null, Colour, TextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / Texture.Width), SpriteEffects.None, 0f);
 
             // draw shield and effects
             Shield.Draw(spriteBatch);
@@ -63,10 +64,29 @@ namespace StarFox2D.Classes
         public void CheckOtherObjectIsWithinBoundaries(Object other)
         {
             overlappingOtherObj = false;
+            if (!other.IsAlive)
+            {
+                otherObjBeingOverlapped = null;
+                return;
+            }
+
             if (other is RoundObject roundObj)
             {
                 overlappingOtherObj = CalculateRoundObjectDistance(Position, roundObj.Position) <= Radius + roundObj.Radius;
-                otherObjBeingOverlapped = other;
+
+                if (overlappingOtherObj && roundObj is Ring ring)
+                {
+                    overlappingOtherObj = false;
+
+                    // add health accordingly, destroy ring
+                    MaxHealth += ring.ShieldIncrease;
+                    Health = Math.Min(MaxHealth, Health + ring.HealthRestored);
+
+                    ring.TakeDamage(ring.MaxHealth);
+                    Shield.ClearDamageTime();
+                }
+                else
+                    otherObjBeingOverlapped = other;
             }
             else if (other is SquareObject squareObj)
             {
@@ -90,6 +110,7 @@ namespace StarFox2D.Classes
 
         protected override void Death()
         {
+            IsAlive = false;
             MainGame.CurrentLevel.PlayerDeath();
         }
     }

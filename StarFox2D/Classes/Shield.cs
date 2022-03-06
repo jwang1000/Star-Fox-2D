@@ -94,17 +94,17 @@ namespace StarFox2D.Classes
         {
             if (ShowDamage)
             {
-                spriteBatch.Draw(Textures.Ring, Position, null, DamageColour.Colour * DamageColour.Opacity, 0,
-                    new Vector2(Textures.Ring.Width / 2, Textures.Ring.Height / 2),
-                    new Vector2((float)Radius * 2 / Textures.Ring.Width), SpriteEffects.None, 0f);
+                spriteBatch.Draw(Textures.RingThin, Position, null, DamageColour.Colour * DamageColour.Opacity, 0,
+                    new Vector2(Textures.RingThin.Width / 2, Textures.RingThin.Height / 2),
+                    new Vector2((float)Radius * 2 / Textures.RingThin.Width), SpriteEffects.None, 0f);
             }
             foreach (EffectType type in ShowEffects.Keys)
             {
                 if (ShowEffects[type])
                 {
-                    spriteBatch.Draw(Textures.Ring, Position, null, EffectColours[type].Colour * EffectColours[type].Opacity, 0,
-                        new Vector2(Textures.Ring.Width / 2, Textures.Ring.Height / 2),
-                        new Vector2(Radius * 2.2f / Textures.Ring.Width), SpriteEffects.None, 0f);
+                    spriteBatch.Draw(Textures.RingThin, Position, null, EffectColours[type].Colour * EffectColours[type].Opacity, 0,
+                        new Vector2(Textures.RingThin.Width / 2, Textures.RingThin.Height / 2),
+                        new Vector2(Radius * 2.2f / Textures.RingThin.Width), SpriteEffects.None, 0f);
                 }
             }
         }
@@ -112,6 +112,12 @@ namespace StarFox2D.Classes
         public void SetDamageTime(double seconds = 3)
         {
             damageTime = Math.Max(damageTime, seconds);
+        }
+
+        public void ClearDamageTime()
+        {
+            damageTime = 0;
+            ShowDamage = false;
         }
     }
 }

@@ -70,6 +70,7 @@ namespace StarFox2D.Classes
         private static ObjectSpawn[] corneriaObjectSpawns =
         {
             new ObjectSpawn(ObjectID.Fly, 60),
+            new ObjectSpawn(ObjectID.RingWhite, 10)
             /*new ObjectSpawn(ObjectID.Fly, 300),
             new ObjectSpawn(ObjectID.Fly, 300),
             new ObjectSpawn(ObjectID.Fly, 280),
@@ -83,10 +84,10 @@ namespace StarFox2D.Classes
             new ObjectSpawn(ObjectID.Fly, 180),
             new ObjectSpawn(ObjectID.Fly, 60)*/
         };
-        private static ObjectID[] corneriaBossSpawns = { ObjectID.Granga };
+        private static ObjectID corneriaBoss = ObjectID.Granga;
         private static string corneriaStartText = "Star Fox! Andross sent me to stop you!";
         private static string corneriaEndText = "Once Andross hears about this, you're through, you hear me? Through!";
-        public static readonly FullLevelDetails Corneria = new FullLevelDetails(Sounds.Corneria, corneriaObjectSpawns, corneriaBossSpawns, corneriaStartText, corneriaEndText);
+        public static readonly FullLevelDetails Corneria = new FullLevelDetails(Sounds.Corneria, corneriaObjectSpawns, corneriaBoss, corneriaStartText, corneriaEndText);
 
 
 
@@ -123,18 +124,18 @@ namespace StarFox2D.Classes
         /// </summary>
         public ObjectSpawn[] ObjectsToSpawn;
 
-        public ObjectID[] BossesToSpawn;
+        public ObjectID BossToSpawn;
 
         public string BossStartText;
 
         public string BossEndText;
 
-        public FullLevelDetails(MusicIntroLoop music, ObjectSpawn[] objectsToSpawn, ObjectID[] bossesToSpawn, string bossStartText, string bossEndText)
+        public FullLevelDetails(MusicIntroLoop music, ObjectSpawn[] objectsToSpawn, ObjectID bossToSpawn, string bossStartText, string bossEndText)
         {
             Music = music;
             SpawnIndex = 0;
             ObjectsToSpawn = objectsToSpawn;
-            BossesToSpawn = bossesToSpawn;
+            BossToSpawn = bossToSpawn;
             BossStartText = bossStartText;
             BossEndText = bossEndText;
         }
@@ -149,14 +150,14 @@ namespace StarFox2D.Classes
         /// TimeSinceLastSpawn is given by the time since the last spawn (change from Python version).
         /// Should be specified in number of frames (@60FPS), not ticks! (converted in Level.Update)
         /// </summary>
-        public int TimeSinceLastSpawn;
+        public int FramesSinceLastSpawn;
         public int LeftX;
         public int RightX;
 
-        public ObjectSpawn(ObjectID objectToSpawn, int timeSinceLastSpawn, int leftX = 0, int rightX = 0)
+        public ObjectSpawn(ObjectID objectToSpawn, int framesSinceLastSpawn, int leftX = 0, int rightX = 0)
         {
             ObjectToSpawn = objectToSpawn;
-            TimeSinceLastSpawn = timeSinceLastSpawn;
+            FramesSinceLastSpawn = framesSinceLastSpawn;
             LeftX = leftX;
             RightX = rightX;
         }

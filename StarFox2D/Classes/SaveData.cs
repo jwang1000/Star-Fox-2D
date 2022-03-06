@@ -8,7 +8,7 @@ namespace StarFox2D.Classes
     public static class SaveData
     {
         /// <summary>
-        /// The highest level copmleted. Ranges from 0-5.
+        /// The highest level copmleted. Ranges from -1 to 4.
         /// </summary>
         public static int LevelCompleted;
 
@@ -20,9 +20,17 @@ namespace StarFox2D.Classes
         /// <summary>
         /// Saves only completed levels and high scores.
         /// </summary>
-        public static void SaveLevelData(object state)
+        public static void SaveLevelData()
         {
+            // update HighScores with MainGame.CurrentScore before writing to disk
+            int level = (int)MainGame.CurrentLevel.LevelNumber;
+            HighScores[level] = Math.Max(HighScores[level], MainGame.CurrentScore);
+
+            if (MainGame.CurrentLevel.State == LevelState.Win)
+                LevelCompleted = Math.Max(LevelCompleted, (int)MainGame.CurrentLevel.LevelNumber);
+
             Debug.WriteLine("SaveLevelData called");
+            Debug.WriteLine("LevelCompleted " + LevelCompleted);
         }
 
         /// <summary>

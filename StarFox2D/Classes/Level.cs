@@ -10,7 +10,7 @@ namespace StarFox2D.Classes
     public class Level
     {
         /// <summary>
-        /// Which level this instance is. Starts from 1.
+        /// Which level this instance is.
         /// </summary>
         public LevelID LevelNumber { get; private set; }
 
@@ -61,7 +61,7 @@ namespace StarFox2D.Classes
             LevelNumber = levelNumber;
 
             levelDetails = LevelOutline.GetLevelDetails(levelNumber);
-            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[0].TimeSinceLastSpawn);
+            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[0].FramesSinceLastSpawn);
             LevelMusic = levelDetails.Music;
 
             TimeBeforeLevelStart = new TimeSpan(0, 0, timeBeforeLevelStartSeconds);
@@ -103,7 +103,7 @@ namespace StarFox2D.Classes
                         }
                         else
                         {
-                            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].TimeSinceLastSpawn);
+                            nextSpawnTimeTicks = LevelOutline.FramestoTicks(levelDetails.ObjectsToSpawn[levelDetails.SpawnIndex].FramesSinceLastSpawn);
                         }
                     }
                     break;
@@ -114,25 +114,27 @@ namespace StarFox2D.Classes
                     break;
 
                 case LevelState.BossStartText:
+                    if (MainGame.Boss == null)
+                        CreateBoss(levelDetails.BossToSpawn);
+
                     if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText + BossStartTextTime)
                         State = LevelState.BossFight;
                     break;
 
                 case LevelState.BossFight:
-
+                    if (!MainGame.Boss.IsAlive)
+                    {
+                        State = LevelState.BossEndText;
+                        bossDefeatTime = levelTime;
+                    }
                     break;
 
                 case LevelState.BossEndText:
                     if (levelTime >= bossDefeatTime + BossEndTextTime)
+                    {
                         State = LevelState.Win;
-                    break;
-
-                case LevelState.Win:
-
-                    break;
-
-                case LevelState.Loss:
-
+                        MainGame.FinishLevel();
+                    }
                     break;
             }
         }
@@ -259,15 +261,35 @@ namespace StarFox2D.Classes
                     break;
 
                 case ObjectID.RingWhite:
+                    o = new Ring(1, id, 0, 10, 20, 10, 0, Textures.RingThick, Color.White)
+                    {
+                        Position = new Vector2(100, -10),
+                        Velocity = new Vector2(0, 200)
+                    };
                     break;
 
                 case ObjectID.RingYellow:
+                    o = new Ring(1, id, 0, 10, 20, 20, 10, Textures.RingThick, Color.Yellow)
+                    {
+                        Position = new Vector2(250, -10),
+                        Velocity = new Vector2(0, 200)
+                    };
                     break;
 
                 case ObjectID.RingGreen:
+                    o = new Ring(1, id, 0, 10, 20, 40, 10, Textures.RingThick, Color.Green)
+                    {
+                        Position = new Vector2(375, -10),
+                        Velocity = new Vector2(0, 200)
+                    };
                     break;
 
                 case ObjectID.RingRed:
+                    o = new Ring(1, id, 0, 10, 20, 500, 5, Textures.RingThick, Color.Red)
+                    {
+                        Position = new Vector2(250, -10),
+                        Velocity = new Vector2(0, 200)
+                    };
                     break;
 
                 default:
@@ -279,24 +301,63 @@ namespace StarFox2D.Classes
         }
 
         /// <summary>
+        /// Given the ID of a boss, creates the Boss and sets MainGame.Boss.
+        /// </summary>
+        public void CreateBoss(ObjectID id)
+        {
+            Object boss = null;
+
+            switch (id)
+            {
+                case ObjectID.Granga:
+                    // TESTING
+                    boss = new RoundEnemy(5, id, 1, 2, 20, Textures.Fly)
+                    {
+                        Position = new Vector2(250, 200),
+                        Velocity = Vector2.Zero
+                    };
+                    break;
+
+                case ObjectID.MechaTurret:
+                    break;
+
+                case ObjectID.GrangaRematch:
+                    break;
+
+                case ObjectID.StarWolfTeam:
+                    break;
+
+                case ObjectID.Andross:
+                    break;
+
+                default:
+                    Debug.WriteLine("Error: tried to create boss when given ID " + id);
+                    break;
+            }
+
+            MainGame.Boss = boss;
+        }
+
+        /// <summary>
         /// Should only be called by the Player class.
         /// </summary>
         public void PlayerDeath()
         {
             State = LevelState.Loss;
-            // TODO clear all object lists
+            MainGame.FinishLevel();
+            // sets MainGame.Update to show game over screen
         }
     }
 
     public enum LevelState
     {
+        Loss,
         BeforeStart,
         Main,
         DoneSpawning,
         BossStartText,
         BossFight,
         BossEndText,
-        Win,
-        Loss
+        Win
     }
 }

@@ -26,7 +26,7 @@ namespace StarFox2D.Classes
         /// <summary>
         /// The colour of the bullets fired or the colour of the building (rings).
         /// </summary>
-        public Color Colour { get; private set; }
+        public Color Colour { get; protected set; }
 
         /// <summary>
         /// The damage done by the bullets fired from the object.
@@ -77,6 +77,7 @@ namespace StarFox2D.Classes
             IsAlive = true;
             Texture = texture;
             TextureRotationSpeed = 0f;
+            Colour = Color.White;
 
             TextureOriginPosition = new Vector2(Texture.Width / 2, Texture.Height / 2);
 
@@ -115,7 +116,7 @@ namespace StarFox2D.Classes
         /// <param name="spriteBatch"></param>
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Texture, TextureOriginPosition, null, Color.White, TextureRotation, new Vector2(Texture.Width / 2, Texture.Height / 2), Vector2.One, SpriteEffects.None, 0f);
+            spriteBatch.Draw(Texture, TextureOriginPosition, null, Colour, TextureRotation, new Vector2(Texture.Width / 2, Texture.Height / 2), Vector2.One, SpriteEffects.None, 0f);
         }
 
         /// <summary>
@@ -178,8 +179,10 @@ namespace StarFox2D.Classes
         Granga, 
         MechaTurret,
         GrangaRematch,
+        StarWolfTeam,
         StarWolfWolf,
         StarWolfPigma,
+        Andross,
         AndrossHead,
         AndrossLH,
         AndrossRH,

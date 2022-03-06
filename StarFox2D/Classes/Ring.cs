@@ -18,11 +18,12 @@ namespace StarFox2D.Classes
         /// </summary>
         public int ShieldIncrease { get; private set; }
 
-        public Ring(int health, ObjectID id, int damage, int score, int radius, int healthRestored, int shieldIncrease, Texture2D texture, Effects bulletEffects = null)
-            : base(health, id, damage, score, radius, texture, bulletEffects)
+        public Ring(int health, ObjectID id, int damage, int score, int radius, int healthRestored, int shieldIncrease, Texture2D texture, Color colour)
+            : base(health, id, damage, score, radius, texture, null)
         {
             HealthRestored = healthRestored;
             ShieldIncrease = shieldIncrease;
+            Colour = colour;
         }
 
         public override void Update(GameTime gameTime, TimeSpan levelTime)
@@ -33,13 +34,19 @@ namespace StarFox2D.Classes
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            throw new NotImplementedException();
+            spriteBatch.Draw(Texture, Position, null, Colour, TextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / Texture.Width), SpriteEffects.None, 0f);
         }
 
         public override bool CheckBulletCollision(Bullet bullet)
         {
             // nothing should happen for rings
             return false;
+        }
+
+        protected override void Death()
+        {
+            base.Death();
+            // TODO play sound for using ring
         }
     }
 }

@@ -14,9 +14,9 @@ namespace StarFox2D.Classes
     {
         public static bool SoundsAreLoaded = false;
 
-        public static float SoundEffectVolume = 1f;
+        public static float SoundEffectVolume = 0.5f;
 
-        public static float MusicVolume = 0f;  // temp, set to 1 after
+        public static float MusicVolume = 0.1f;  // temp, set to 0.5 after
 
 
 
@@ -121,7 +121,7 @@ namespace StarFox2D.Classes
             if (State == MusicState.FadingOut)
             {
                 FadeoutTimeRemaining -= gameTime.ElapsedGameTime;
-                if (FadeoutTimeRemaining < TimeSpan.Zero)
+                if (FadeoutTimeRemaining <= TimeSpan.Zero)
                     Stop();
                 else
                 {
@@ -143,10 +143,8 @@ namespace StarFox2D.Classes
 
         public void Stop()
         {
-            if (State == MusicState.PlayingIntro)
-            {
+            if (IntroInstance != null)
                 IntroInstance.Stop();
-            }
             MainSectionInstance.Stop();
 
             IntroTimeSpent = TimeSpan.Zero;
