@@ -10,15 +10,15 @@ namespace StarFox2D.Classes
     {
         public int SideLength { get; protected set; }
 
-        public SquareObject(int health, ObjectID id, int damage, int score, int sideLength, Texture2D texture, Effects bulletEffects = null)
-            : base(health, id, damage, score, texture, bulletEffects) 
+        public SquareObject(int health, ObjectID id, int damage, int score, int sideLength, Texture2D texture, EffectType? bulletEffect = null)
+            : base(health, id, damage, score, texture, bulletEffect) 
         {
             SideLength = sideLength;
         }
 
         public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
-            // Regular square objects (non-enemies) shouldn't do anything
+            // Regular square objects (non-enemies) shouldn't do anything, effects shouldn't do anything either
         }
 
         public override void Draw(SpriteBatch spriteBatch)

@@ -17,8 +17,8 @@ namespace StarFox2D.Classes
         private Object otherObjBeingOverlapped;
         private Shield Shield;
 
-        public Player(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, Effects bulletEffects = null)
-            : base(health, id, damage, score, radius, texture, bulletEffects) 
+        public Player(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, EffectType? bulletEffect = null)
+            : base(health, id, damage, score, radius, texture, bulletEffect) 
         {
             BaseVelocity = 300;
             Shield = new Shield(Position, Radius);
@@ -41,6 +41,7 @@ namespace StarFox2D.Classes
                 otherObjBeingOverlapped = null;
             }
 
+            AppliedEffects.Update(gameTime);
             Shield.Update(gameTime, Position);
         }
 
@@ -102,9 +103,9 @@ namespace StarFox2D.Classes
             }
         }
 
-        public override void TakeDamage(int damage, Effects effects = null)
+        public override void TakeDamage(int damage, EffectType? effect = null)
         {
-            base.TakeDamage(damage, effects);
+            base.TakeDamage(damage, effect);
             Shield.SetDamageTime();
         }
 

@@ -11,15 +11,15 @@ namespace StarFox2D.Classes
     {
         public int Radius { get; protected set; }
 
-        public RoundObject(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, Effects bulletEffects = null) 
-            : base(health, id, damage, score, texture, bulletEffects) 
+        public RoundObject(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, EffectType? bulletEffect = null) 
+            : base(health, id, damage, score, texture, bulletEffect) 
         {
             Radius = radius;
         }
 
         public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
-            // Regular round objects (non-enemies) shouldn't do anything
+            // Regular round objects (non-enemies) shouldn't do anything, effects shouldn't do anything either
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -40,7 +40,7 @@ namespace StarFox2D.Classes
                 bullet.Position.Y - bullet.Radius <= Position.Y + Radius)
             {
                 bullet.IsAlive = false;
-                TakeDamage(bullet.Damage, bullet.BulletEffects);
+                TakeDamage(bullet.Damage, bullet.BulletEffect);
                 return true;
             }
             return false;

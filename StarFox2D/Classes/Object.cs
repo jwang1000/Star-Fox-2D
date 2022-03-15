@@ -41,9 +41,9 @@ namespace StarFox2D.Classes
         public bool IsAlive { get; protected set; }
 
         /// <summary>
-        /// The effects applied by the bullets fired from the object.
+        /// The effect applied by the bullets fired from the object.
         /// </summary>
-        public Effects BulletEffects { get; private set; }
+        public EffectType? BulletEffect { get; private set; }
 
         /// <summary>
         /// The effects that affect the current object. Must call AppliedEffects.Update in Object.Update!
@@ -67,7 +67,7 @@ namespace StarFox2D.Classes
         protected float TextureRotation { get; set; }
 
 
-        public Object(int health, ObjectID id, int damage, int score, Texture2D texture, Effects bulletEffects = null)
+        public Object(int health, ObjectID id, int damage, int score, Texture2D texture, EffectType? bulletEffect = null)
         {
             Health = health;
             MaxHealth = health;
@@ -78,6 +78,8 @@ namespace StarFox2D.Classes
             Texture = texture;
             TextureRotationSpeed = 0f;
             Colour = Color.White;
+            BulletEffect = bulletEffect;
+            AppliedEffects = new Effects();
 
             TextureOriginPosition = new Vector2(Texture.Width / 2, Texture.Height / 2);
 
@@ -96,11 +98,6 @@ namespace StarFox2D.Classes
                 }
             }
             */
-
-            if (bulletEffects is null)
-                BulletEffects = new Effects();
-            else
-                BulletEffects = bulletEffects;
         }
 
 
@@ -135,7 +132,7 @@ namespace StarFox2D.Classes
         /// Inflicts damage on the object and applies effects if appropriate. Calls Death() if necessary.
         /// WARNING: Must be overridden to display the shield! Slowness will be applied here, but will not have an effect on non-enemies/players/bosses.
         /// </summary>
-        public virtual void TakeDamage(int damage, Effects effects = null)
+        public virtual void TakeDamage(int damage, EffectType? effect = null)
         {
             Health -= damage;
             Debug.WriteLine("health is now " + Health + " after taking " + damage + " damage");
@@ -143,9 +140,10 @@ namespace StarFox2D.Classes
             {
                 Death();
             }
-            else if (effects != null && effects.Count > 0)
+            else if (effect != null && effect != EffectType.Target)
             {
                 // TODO apply statuses once implemented
+                AppliedEffects.AddEffect((EffectType) effect);
             }
         }
 

@@ -62,6 +62,8 @@ namespace StarFox2D
 
         public static readonly int baseBulletSpeed = 800;
 
+        public static Random Random;
+
 
         /// <summary>
         /// Whether or not the player is currently in a level.
@@ -141,7 +143,7 @@ namespace StarFox2D
         private MouseState mouseState;
         private MouseState lastMouseState;
 
-        private string loadingText;
+        private string loadingText = "Loading";
 
         private ControlScheme controlScheme;
         private Keys moveUp;
@@ -157,7 +159,7 @@ namespace StarFox2D
         private TextBox ControlSchemeDescription;
 
         private string previousHighScoreText;
-        private string newHighScoreText;
+        private readonly string newHighScoreText = "New High Score!";
         private Button ExitLevel;
 
         #endregion
@@ -168,6 +170,7 @@ namespace StarFox2D
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            Random = new Random();
 
             playingLevel = false;
             menuPage = MenuPages.TitleScreen;
@@ -181,8 +184,6 @@ namespace StarFox2D
             buttons = new List<Button>();
             settingsSliders = new List<Slider>();
             menuText = new List<TextBox>();
-            loadingText = "Loading";
-            newHighScoreText = "New High Score!";
         }
 
         protected override void Initialize()
@@ -191,6 +192,9 @@ namespace StarFox2D
             graphics.PreferredBackBufferWidth = ScreenWidth;
             graphics.PreferredBackBufferHeight = ScreenHeight;
             graphics.ApplyChanges();
+
+            Window.AllowUserResizing = false;
+            Window.Title = "Star Fox 2D v2.0";
 
             base.Initialize();
         }
@@ -890,7 +894,6 @@ namespace StarFox2D
         public static void FinishLevel()
         {
             Objects.Clear();
-            Bullets.Clear();
             Boss = null;
             SaveData.SaveLevelData();  // high score, level completed is updated in SaveLevelData
         }

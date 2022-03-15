@@ -142,7 +142,7 @@ namespace StarFox2D.Classes
 
         /// <summary>
         /// Given the ID of an object, returns an instance of the object.
-        /// Does not create bosses.
+        /// Does not create bosses. Does not add the object to the list of objects in MainGame.
         /// </summary>
         public Object CreateObject(ObjectID id)
         {
@@ -156,10 +156,11 @@ namespace StarFox2D.Classes
             Vector2 pos;
             Vector2 vel;
             Texture2D texture;
+
             switch (id)
             {
                 case ObjectID.Fly:
-                    o = new RoundEnemy(5, id, 1, 2, 20, Textures.Fly)
+                    o = new RoundEnemy(5, id, 10, 2, 20, Textures.Fly, EffectType.Target)
                     {
                         Position = new Vector2(250, -10),
                         Velocity = new Vector2(50, 400)
@@ -311,7 +312,7 @@ namespace StarFox2D.Classes
             {
                 case ObjectID.Granga:
                     // TESTING
-                    boss = new RoundEnemy(5, id, 1, 2, 20, Textures.Fly)
+                    boss = new RoundEnemy(5, id, 10, 2, 20, Textures.Fly, EffectType.Target)
                     {
                         Position = new Vector2(250, 200),
                         Velocity = Vector2.Zero

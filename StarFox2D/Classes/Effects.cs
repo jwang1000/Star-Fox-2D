@@ -9,8 +9,10 @@ namespace StarFox2D.Classes
     {
         public int Count { get; private set; }
 
+        public static TimeSpan StandardDuration = new TimeSpan(0, 0, 3);
+
         /// <summary>
-        /// Maps effects to the time when the effect should be removed.
+        /// Maps effects to the remaining time of the effect.
         /// </summary>
         private Dictionary<EffectType, TimeSpan> effects;
 
@@ -19,23 +21,27 @@ namespace StarFox2D.Classes
             effects = new Dictionary<EffectType, TimeSpan>();
         }
 
-        public void AddEffect(EffectType type, TimeSpan currentTime, TimeSpan duration)
+        public void AddEffect(EffectType type, TimeSpan? duration = null)
         {
+            if (duration == null)
+                duration = StandardDuration;
+
             if (effects.ContainsKey(type))
             {
-                effects[type] = currentTime + duration;
+                effects[type] = (TimeSpan) duration;
             }
             else
             {
-                effects.Add(type, currentTime + duration);
+                effects.Add(type, (TimeSpan) duration);
             }
         }
 
-        public void Update(TimeSpan levelTime)
+        public void Update(GameTime gameTime)
         {
             foreach (var pair in effects)
             {
-                if (pair.Value < levelTime)
+                effects[pair.Key] -= gameTime.ElapsedGameTime;
+                if (pair.Value.TotalSeconds <= 0)
                 {
                     effects.Remove(pair.Key);
                 }
