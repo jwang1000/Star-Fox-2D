@@ -160,7 +160,7 @@ namespace StarFox2D.Classes
             switch (id)
             {
                 case ObjectID.Fly:
-                    o = new RoundEnemy(5, id, 10, 2, 20, Textures.Fly, EffectType.Target)
+                    o = new RoundEnemy(5, id, 10, 5, 20, Textures.Fly)
                     {
                         Position = new Vector2(250, -10),
                         Velocity = new Vector2(50, 400)
@@ -311,11 +311,10 @@ namespace StarFox2D.Classes
             switch (id)
             {
                 case ObjectID.Granga:
-                    // TESTING
-                    boss = new RoundEnemy(5, id, 10, 2, 20, Textures.Fly, EffectType.Target)
+                    boss = new Granga(100, id, 2, 150, 50, Textures.Granga)
                     {
                         Position = new Vector2(250, 200),
-                        Velocity = Vector2.Zero
+                        Velocity = new Vector2(240)
                     };
                     break;
 

@@ -282,7 +282,7 @@ namespace StarFox2D
                         playerVelocity.Y += Player.BaseVelocity;
 
                     // constrain movement vertically
-                    if (Player.Position.Y <= playerBossBorder)
+                    if (Player.Position.Y - Player.Radius <= playerBossBorder)
                         playerVelocity.Y = MathF.Max(0, playerVelocity.Y);
                     else if (Player.Position.Y >= ScreenHeight)
                         playerVelocity.Y = MathF.Min(0, playerVelocity.Y);

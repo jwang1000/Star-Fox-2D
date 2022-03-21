@@ -22,7 +22,7 @@ namespace StarFox2D.Classes
         protected TimeSpan AliveTime;
         protected TimeSpan LastFiredAliveTime;
 
-        private Shield Shield;
+        protected Shield Shield;
 
         public RoundEnemy(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, EffectType? bulletEffect = null)
             : base(health, id, damage, score, radius, texture, bulletEffect)
@@ -61,7 +61,7 @@ namespace StarFox2D.Classes
                     break;
 
                 default:
-                    Debug.WriteLine("Error: creating round enemy with ID " + ID);
+                    Debug.WriteLine("Error: creating round enemy with ID " + ID + ", should only occur when creating a boss");
                     TimeBetweenShots = 1;
                     MisfireChance = 0;
                     break;

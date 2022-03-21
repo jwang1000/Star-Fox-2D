@@ -25,11 +25,7 @@ namespace StarFox2D.Classes
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture, Position, null, Colour, TextureRotation, TextureOriginPosition, new Vector2((float)Radius * 2 / Texture.Width), SpriteEffects.None, 0f);
-
-            if (this is RoundEnemy)
-            {
-                // TODO draw effects
-            }
+            // effects are only displayed if the object has a shield (i.e. enemies)
         }
 
         public override bool CheckBulletCollision(Bullet bullet)
