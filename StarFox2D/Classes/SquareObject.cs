@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace StarFox2D.Classes
@@ -14,11 +15,18 @@ namespace StarFox2D.Classes
             : base(health, id, damage, score, texture, bulletEffect) 
         {
             SideLength = sideLength;
+            TextureRotationSpeed = MainGame.Random.Next(-7, 7);
         }
 
         public override void Update(GameTime gameTime, TimeSpan levelTime)
         {
             // Regular square objects (non-enemies) shouldn't do anything, effects shouldn't do anything either
+
+            if (ID == ObjectID.Satellite)
+            {
+                // Satellites rotate at random speeds
+                TextureRotation += TextureRotationSpeed * (float) gameTime.ElapsedGameTime.TotalSeconds;
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -29,7 +37,16 @@ namespace StarFox2D.Classes
 
         public override bool CheckBulletCollision(Bullet bullet)
         {
-            throw new NotImplementedException();
+            if (bullet.Position.X + bullet.Radius >= Position.X - SideLength / 2 &&
+                bullet.Position.X - bullet.Radius <= Position.X + SideLength / 2 &&
+                bullet.Position.Y + bullet.Radius >= Position.Y - SideLength / 2 &&
+                bullet.Position.Y - bullet.Radius <= Position.Y + SideLength / 2)
+            {
+                bullet.IsAlive = false;
+                TakeDamage(bullet.Damage, bullet.BulletEffect);
+                return true;
+            }
+            return false;
         }
 
         public override bool ObjectIsOutsideScreen()

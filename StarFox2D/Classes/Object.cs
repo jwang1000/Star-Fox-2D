@@ -38,7 +38,7 @@ namespace StarFox2D.Classes
         /// </summary>
         public int Score { get; private set; }
 
-        public bool IsAlive { get; protected set; }
+        public bool IsAlive { get; set; }
 
         /// <summary>
         /// The effect applied by the bullets fired from the object.

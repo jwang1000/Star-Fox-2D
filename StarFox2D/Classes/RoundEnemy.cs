@@ -24,6 +24,11 @@ namespace StarFox2D.Classes
 
         protected Shield Shield;
 
+        private float hornetCentreX;
+        private Vector2 miniAndrossDestination;
+        private float miniAndrossBaseSpeed;
+        private TimeSpan miniAndrossLastChangedDestination;
+
         public RoundEnemy(int health, ObjectID id, int damage, int score, int radius, Texture2D texture, EffectType? bulletEffect = null)
             : base(health, id, damage, score, radius, texture, bulletEffect)
         {
@@ -58,6 +63,9 @@ namespace StarFox2D.Classes
                 case ObjectID.MiniAndross:
                     TimeBetweenShots = 0.5;
                     MisfireChance = 0;
+                    miniAndrossDestination = new Vector2(150);
+                    miniAndrossBaseSpeed = 300;
+                    miniAndrossLastChangedDestination = TimeSpan.Zero;
                     break;
 
                 default:
@@ -74,6 +82,50 @@ namespace StarFox2D.Classes
             Shoot();
             AppliedEffects.Update(gameTime);
             Shield.Update(gameTime, Position);
+
+            // hornet swerves around its center
+            if (ID == ObjectID.Hornet)
+            {
+                if (hornetCentreX == 0)
+                    hornetCentreX = Position.X;
+
+                else if (Math.Abs(Position.X - hornetCentreX) >= 20)
+                    Velocity = new Vector2(-Velocity.X, Velocity.Y);
+            }
+            // mini andross stays on screen until defeated
+            else if (ID == ObjectID.MiniAndross)
+            {
+                if (Math.Abs(Position.X - miniAndrossDestination.X) <= 5 && Velocity.X != 0)
+                {
+                    Velocity = new Vector2(0, Velocity.Y);
+                    Debug.WriteLine("stopped x velocity");
+                }
+                if (Math.Abs(Position.Y - miniAndrossDestination.Y) <= 5 && Velocity.Y != 0)
+                {
+                    Velocity = new Vector2(Velocity.X, 0);
+                    Debug.WriteLine("stopped y velocity");
+                }
+                miniAndrossLastChangedDestination += gameTime.ElapsedGameTime;
+
+                // calculate new destination and set velocity every 4 seconds
+                if (miniAndrossLastChangedDestination.TotalSeconds >= 4)
+                {
+                    miniAndrossLastChangedDestination = TimeSpan.Zero;
+                    miniAndrossDestination = new Vector2(50 + (float)MainGame.Random.NextDouble() * (MainGame.ScreenWidth - 100),
+                        70 + (float)MainGame.Random.NextDouble() * (MainGame.ScreenHeight / 2 - 140));
+                    Debug.WriteLine("Position: " + Position + ", new destination: " + miniAndrossDestination);
+
+                    float newVelocityX = miniAndrossBaseSpeed;
+                    float newVelocityY = miniAndrossBaseSpeed;
+                    if (Position.X > miniAndrossDestination.X)
+                        newVelocityX *= -1;
+                    if (Position.Y > miniAndrossDestination.Y)
+                        newVelocityY *= -1;
+
+                    Velocity = new Vector2(newVelocityX, newVelocityY);
+                    Debug.WriteLine("new velocity: " + Velocity);
+                }
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -116,12 +168,17 @@ namespace StarFox2D.Classes
                         Position = new Vector2(Position.X, Position.Y + Radius)
                     };
                     Vector2 dest = MainGame.Player.Position;
-                    if (rand < MisfireChance)
+                    if (rand / 2 < MisfireChance)
                     {
-                        if (rand < MisfireChance / 2)
+                        if (rand / 2 < MisfireChance / 2)
                             dest.X -= MainGame.Player.Radius / 2;
                         else
                             dest.X += MainGame.Player.Radius / 2;
+                    }
+                    else if (rand < MisfireChance)
+                    {
+                        // don't fire at all
+                        return;
                     }
                     b.Velocity = MainGame.CalculateBulletVelocity(b.Position, dest, MainGame.baseBulletSpeed);
 

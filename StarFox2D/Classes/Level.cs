@@ -32,12 +32,12 @@ namespace StarFox2D.Classes
         /// <summary>
         /// The length of time that the boss text displays for before the boss fight begins.
         /// </summary>
-        public TimeSpan BossStartTextTime { get; private set; }
+        public TimeSpan BossStartTextDisplayTime { get; private set; }
 
         /// <summary>
         /// The length of time that the boss text displays for after the boss is defeated.
         /// </summary>
-        public TimeSpan BossEndTextTime { get; private set; }
+        public TimeSpan BossEndTextDisplayTime { get; private set; }
 
         public MusicIntroLoop LevelMusic { get; private set; }
 
@@ -48,7 +48,7 @@ namespace StarFox2D.Classes
         private FullLevelDetails levelDetails;
 
         private TimeSpan lastSpawnedObjectTime;
-
+        private TimeSpan bossStartTextTime;
         private TimeSpan bossDefeatTime;
 
         private bool spawningIsValid;
@@ -66,12 +66,13 @@ namespace StarFox2D.Classes
 
             TimeBeforeLevelStart = new TimeSpan(0, 0, timeBeforeLevelStartSeconds);
             TimeBeforeBossText = new TimeSpan(0, 0, timeBeforeBossTextSeconds);
-            BossStartTextTime = new TimeSpan(0, 0, bossStartTextSeconds);
-            BossEndTextTime = new TimeSpan(0, 0, bossEndTextSeconds);
+            BossStartTextDisplayTime = new TimeSpan(0, 0, bossStartTextSeconds);
+            BossEndTextDisplayTime = new TimeSpan(0, 0, bossEndTextSeconds);
             BossStartText = levelDetails.BossStartText;
             BossEndText = levelDetails.BossEndText;
             State = LevelState.BeforeStart;
             lastSpawnedObjectTime = TimeBeforeLevelStart;
+            bossStartTextTime = TimeBeforeLevelStart;
         }
 
 
@@ -109,15 +110,18 @@ namespace StarFox2D.Classes
                     break;
 
                 case LevelState.DoneSpawning:
-                    if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText)
+                    if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText && MainGame.Objects.Count == 0)
+                    {
+                        bossStartTextTime = levelTime;
                         State = LevelState.BossStartText;
+                    }
                     break;
 
                 case LevelState.BossStartText:
                     if (MainGame.Boss == null)
                         CreateBoss(levelDetails.BossToSpawn);
 
-                    if (levelTime >= lastSpawnedObjectTime + TimeBeforeBossText + BossStartTextTime)
+                    if (levelTime >= bossStartTextTime + BossStartTextDisplayTime)
                         State = LevelState.BossFight;
                     break;
 
@@ -130,7 +134,7 @@ namespace StarFox2D.Classes
                     break;
 
                 case LevelState.BossEndText:
-                    if (levelTime >= bossDefeatTime + BossEndTextTime)
+                    if (levelTime >= bossDefeatTime + BossEndTextDisplayTime)
                     {
                         State = LevelState.Win;
                         MainGame.FinishLevel();
@@ -151,7 +155,6 @@ namespace StarFox2D.Classes
                 Position = new Vector2(250, -30),
                 Velocity = MainGame.BackgroundObjectVelocity
             };
-            Random random = new Random();
             int randInt;
             Vector2 pos;
             Vector2 vel;
@@ -160,7 +163,7 @@ namespace StarFox2D.Classes
             switch (id)
             {
                 case ObjectID.Fly:
-                    o = new RoundEnemy(5, id, 10, 5, 20, Textures.Fly)
+                    o = new RoundEnemy(2, id, 10, 5, 20, Textures.Fly)
                     {
                         Position = new Vector2(250, -10),
                         Velocity = new Vector2(50, 400)
@@ -168,19 +171,66 @@ namespace StarFox2D.Classes
                     break;
 
                 case ObjectID.Mosquito:
+                    randInt = MainGame.Random.Next(1, 3);
+                    pos = new Vector2(125, -10);
+
+                    if (randInt == 2)
+                        pos.X = 250;
+                    else if (randInt == 3)
+                        pos.X = 375;
+
+                    o = new RoundEnemy(3, id, 10, 5, 24, Textures.Mosquito)
+                    {
+                        Position = pos,
+                        Velocity = new Vector2(50, 400)
+                    };
                     break;
 
                 case ObjectID.Hornet:
+                    // 3 are spawned at once - return 1, add 2 directly
+                    o = new RoundEnemy(2, id, 5, 5, 25, Textures.Hornet)
+                    {
+                        Position = new Vector2(100, -10),
+                        Velocity = new Vector2(180, 480)
+                    };
+                    MainGame.Objects.Add(new RoundEnemy(2, id, 5, 5, 25, Textures.Hornet)
+                    {
+                        Position = new Vector2(250, -10),
+                        Velocity = new Vector2(180, 480)
+                    });
+                    MainGame.Objects.Add(new RoundEnemy(2, id, 5, 5, 25, Textures.Hornet)
+                    {
+                        Position = new Vector2(400, -10),
+                        Velocity = new Vector2(180, 480)
+                    });
                     break;
 
                 case ObjectID.QueenFly:
+                    randInt = MainGame.Random.Next(1, 3);
+                    pos = new Vector2(125, -10);
+
+                    if (randInt == 2)
+                        pos.X = 250;
+                    else if (randInt == 3)
+                        pos.X = 375;
+
+                    o = new RoundEnemy(4, id, 10, 5, 30, Textures.Queen, EffectType.Slow)
+                    {
+                        Position = pos,
+                        Velocity = new Vector2(50, 400)
+                    };
                     break;
 
                 case ObjectID.MiniAndross:
+                    o = new RoundEnemy(15, id, 5, 30, 32, Textures.MiniAndross)
+                    {
+                        Position = new Vector2(0, -10),
+                        Velocity = new Vector2(300, 300)
+                    };
                     break;
 
                 case ObjectID.Asteroid:
-                    randInt = random.Next(1, 3);
+                    randInt = MainGame.Random.Next(1, 3);
                     pos = new Vector2(150, -30);
 
                     if (randInt == 1)
@@ -206,7 +256,7 @@ namespace StarFox2D.Classes
                     break;
 
                 case ObjectID.SmallAsteroid:
-                    randInt = random.Next(1, 2);
+                    randInt = MainGame.Random.Next(1, 2);
                     pos = new Vector2(150, -30);
 
                     if (randInt == 1)
@@ -229,9 +279,9 @@ namespace StarFox2D.Classes
 
                 case ObjectID.Debris:
                     // debris move in random directions
-                    randInt = random.Next(1, 3);
+                    randInt = MainGame.Random.Next(1, 3);
                     pos = new Vector2(150, -30);
-                    vel = new Vector2((float)random.Next(0, 100) / 100, (float)random.Next(50, 70) / 10);
+                    vel = new Vector2((float)MainGame.Random.Next(0, 100) / 100, (float)MainGame.Random.Next(50, 70) / 10);
 
                     if (randInt == 1)
                     {
@@ -256,6 +306,30 @@ namespace StarFox2D.Classes
                     break;
 
                 case ObjectID.Satellite:
+                    randInt = MainGame.Random.Next(1, 3);
+                    pos = new Vector2(125, -30);
+                    vel = MainGame.BackgroundObjectVelocity;
+
+                    if (randInt == 1)
+                    {
+                        texture = Textures.Satellite1;
+                    }
+                    else if (randInt == 2)
+                    {
+                        pos.X = 250;
+                        texture = Textures.Satellite2;
+                    }
+                    else
+                    {
+                        pos.X = 375;
+                        texture = Textures.Satellite3;
+                    }
+
+                    o = new SquareObject(2, ObjectID.Satellite, 0, 1, 55, texture)
+                    {
+                        Position = pos,
+                        Velocity = vel
+                    };
                     break;
 
                 case ObjectID.Turret:

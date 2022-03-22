@@ -69,7 +69,7 @@ namespace StarFox2D.Classes
 
         private static ObjectSpawn[] corneriaObjectSpawns =
         {
-            new ObjectSpawn(ObjectID.Fly, 60),
+            new ObjectSpawn(ObjectID.Satellite, 60),
             new ObjectSpawn(ObjectID.RingWhite, 10)
             /*new ObjectSpawn(ObjectID.Fly, 300),
             new ObjectSpawn(ObjectID.Fly, 300),
